@@ -7,34 +7,33 @@ export default {
   // Target: https://go.nuxtjs.dev/config-target
   target: 'static',
   router: {
-    routes: [
-      {
+    routes: [],
+    extendRoutes(routes, resolve) {
+      routes.push({
         name: 'movie-detail',
         path: '/movies/:slug',
-        component: 'pages/movies/_slug/index.vue',
-      },
-      {
+        component: resolve(__dirname, 'pages/movies/movie_detail/index.vue'),
+      })
+      routes.push({
         name: 'movie-detail-play',
         path: '/movies/:slug/play',
-        component: 'pages/movies/_slug/play.vue',
-      },
-      {
+        component: resolve(__dirname, 'pages/movies/movie_detail/play.vue'),
+      })
+      routes.push({
+        name: 'movie-detail',
+        path: '/movies/:slug',
+        component: resolve(__dirname, 'pages/movies/movie_detail/index.vue'),
+      })
+      routes.push({
         name: 'movie-couplet',
         path: '/movies/couplet/:slug',
-        component: 'pages/movies/couplet/_slug/index.vue',
-      },
-      {
+        component: resolve(__dirname, 'pages/movies/couplet/index.vue'),
+      })
+      routes.push({
         name: 'movie-word',
         path: '/movies/word/:slug',
-        component: 'pages/movies/word/_slug/index.vue',
-      },
-    ],
-    extendRoutes(routes, resolve) {
-      // routes.push({
-      //   name: 'movie-detail',
-      //   path: '/movies/:slug',
-      //   component: resolve(__dirname, 'pages/_slug/index.vue'),
-      // })
+        component: resolve(__dirname, 'pages/movies/word/index.vue'),
+      })
     },
   },
   generate: {
