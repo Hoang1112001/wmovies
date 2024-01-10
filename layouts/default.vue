@@ -1,23 +1,23 @@
 <template>
   <v-app>
     <v-main class="scroll-y">
-      <v-tooltip left>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            v-bind="attrs"
-            v-on="on"
-            class="mt-8"
-            fab
-            color="error"
-            top
-            right
-            absolute
-          >
-            <v-icon>mdi-magnify</v-icon>
-          </v-btn>
-        </template>
+      <!-- <v-tooltip left>
+        <template v-slot:activator="{ on, attrs }"> -->
+      <!-- <v-btn
+        v-scroll="onScroll"
+        class="mt-8"
+        fab
+        color="error"
+        bottom
+        right
+        small
+        absolute
+      >
+        <v-icon>mdi-magnify</v-icon>
+      </v-btn> -->
+      <!-- </template>
         <span>Tìm kiếm phim</span>
-      </v-tooltip>
+      </v-tooltip> -->
       <HeaderMovie></HeaderMovie>
 
       <Nuxt dark class="error" />

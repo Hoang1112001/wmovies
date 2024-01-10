@@ -3,40 +3,29 @@
     <v-card flat tile class="white--text text-center error">
       <v-divider></v-divider>
       <v-card-text></v-card-text>
-      <v-card-text class="white--text pt-0">
-        Phasellus feugiat arcu sapien, et iaculis ipsum elementum sit amet.
-        Mauris cursus commodo interdum. Praesent ut risus eget metus luctus
-        accumsan id ultrices nunc. Sed at orci sed massa consectetur dignissim a
-        sit amet dui. Duis commodo vitae velit et faucibus. Morbi vehicula
-        lacinia malesuada. Nulla placerat augue vel ipsum ultrices, cursus
-        iaculis dui sollicitudin. Vestibulum eu ipsum vel diam elementum tempor
-        vel ut orci. Orci varius natoque penatibus et magnis dis parturient
-        montes, nascetur ridiculus mus.
+      <v-card-text class="white--text pt-0 text-center">
+        WMovies phát triển phục vụ cho nhu cầu tìm hiểu, thực hiện đồ án tốt
+        nghiệp, không vì mục đích thương mại. Cảm ơn các bạn đã ghé thăm trang
+        web, mọi đóng góp của các bạn xin được phép ghi nhận để cải thiện trang
+        web tốt hơn. Trân trọng cảm ơn !
       </v-card-text>
 
       <v-divider></v-divider>
 
       <v-card-text class="white--text">
-        {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+        {{ new Date().getFullYear() }} — <strong>Copyright by HuyHoang</strong>
       </v-card-text>
     </v-card>
   </v-footer>
 </template>
 <script>
 // Nơi để import package
-import gql from 'graphql-tag'
+// import gql from 'graphql-tag'
 
 export default {
   layout: '', // layout chính của file
   props: {}, // Nhận data được truyền vào
-  data: () => ({
-    test2222: 'data test2222', // khai báo biến
-    test1111: 'data test1111',
-    userModel: null,
-    userId: null,
-    users: [],
-    clickTime: 0,
-  }),
+  data: () => ({}),
   computed: {
     // compute field xài trên giao diện
   },
@@ -49,31 +38,7 @@ export default {
   mounted() {
     // called after the DOM has been mounted or rendered
   },
-  methods: {
-    changeDataTest2222() {
-      this.clickTime++
-    },
-  },
-  apollo: {
-    movies: {
-      query: gql(`query MyQuery {
-        movies {
-          code
-          id
-          name
-
-        }
-
-      }`),
-      update: (data) => {},
-      result({ data }) {
-        console.log('connect hasura ', data)
-
-        // this.movies = data.movies
-
-        // this.modelUser.internal_hospital = data.internal_hospitals[1]
-      },
-    },
-  },
+  methods: {},
+  apollo: {},
 }
 </script>

@@ -20,11 +20,6 @@ export default {
         component: resolve(__dirname, 'pages/movies/movie_detail/play.vue'),
       })
       routes.push({
-        name: 'movie-detail',
-        path: '/movies/:slug',
-        component: resolve(__dirname, 'pages/movies/movie_detail/index.vue'),
-      })
-      routes.push({
         name: 'movie-couplet',
         path: '/movies/couplet/:slug',
         component: resolve(__dirname, 'pages/movies/couplet/index.vue'),
@@ -34,15 +29,15 @@ export default {
         path: '/movies/word/:slug',
         component: resolve(__dirname, 'pages/movies/word/index.vue'),
       })
+      routes.push({
+        name: 'actor',
+        path: '/actors/:slug',
+        component: resolve(__dirname, 'pages/actors/index.vue'),
+      })
     },
   },
   generate: {
     dir: process.env.DEPLOY_DIR || 'dist',
-    // routes() {
-    //   const slugs = ['KCB', 'TN', 'DP', 'BANT', 'BS']
-    //   const routes = slugs.map((slug) => `/${slug}`)
-    //   return routes
-    // },
   },
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -72,6 +67,7 @@ export default {
     '@nuxtjs/eslint-module',
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+    '@nuxtjs/firebase',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -88,6 +84,8 @@ export default {
     '@nuxtjs/firebase',
 
     '@nuxtjs/dotenv',
+
+    '@nuxtjs/toast',
   ],
   //
   apollo: {
@@ -150,24 +148,38 @@ export default {
       },
     },
   },
-
+  toast: {
+    position: 'top-right',
+    duration: 3000,
+    iconPack: 'mdi',
+    keepOnHover: true,
+    register: [
+      // Register custom toasts
+      {
+        name: 'my-error',
+        message: 'Oops...Something went wrong',
+        options: {
+          type: 'error',
+        },
+      },
+    ],
+  },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     hotMiddleware: true,
   },
   firebase: {
     config: {
-      apiKey: 'AIzaSyArVeDEa0vRiK4g3s2hACyvCQul0uKssvo',
-      authDomain: 'ent-hms.firebaseapp.com',
-      databaseURL: 'https://ent-hms-default-rtdb.firebaseio.com',
-      projectId: 'ent-hms',
-      storageBucket: 'ent-hms.appspot.com',
-      messagingSenderId: '911014492216',
-      appId: '1:911014492216:web:01862da5a9173708f50ecd',
-      measurementId: 'G-9X4C18M5M3',
+      apiKey: 'AIzaSyBywLoLM7yhLtsX7h1oeeI7Z1S2ALJZB6Q',
+      authDomain: 'wmovies-821a0.firebaseapp.com',
+      projectId: 'wmovies-821a0',
+      storageBucket: 'wmovies-821a0.appspot.com',
+      messagingSenderId: '681078994887',
+      appId: '1:681078994887:web:143f215a81e0878bc58be2',
+      measurementId: 'G-1Q353X4BT2',
     },
     services: {
-      auth: true, // Just as example. Can be any other service.
+      storage: true,
     },
   },
 }

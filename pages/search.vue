@@ -1,3 +1,5 @@
+<!-- eslint-disable vue/require-v-for-key -->
+<!-- eslint-disable nuxt/no-globals-in-created -->
 <!-- eslint-disable vue/valid-v-for -->
 <!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <!-- eslint-disable vue/no-multiple-template-root -->
@@ -13,7 +15,7 @@
         </v-btn>
       </template>
     </v-snackbar>
-    <v-dialog v-model="dialogLoading" hide-overlay persistent width="500">
+    <!-- <v-dialog v-model="loadingMovie" hide-overlay persistent width="500">
       <v-card color="error" dark>
         <v-card-text>
           {{ loadingText }}
@@ -24,8 +26,13 @@
           ></v-progress-linear>
         </v-card-text>
       </v-card>
-    </v-dialog>
-
+    </v-dialog> -->
+    <v-overlay :value="loadingMovie">
+      <v-layout class="d-flex flex-column" justify-center align-center>
+        <v-progress-circular indeterminate size="64"></v-progress-circular>
+        <span class="h4"> Đang tải dữ liệu, vui lòng đợi ...</span>
+      </v-layout>
+    </v-overlay>
     <!-- Main -->
     <v-card elevation="24" width="95%" style="margin: 10px auto" class="white">
       <v-row>
@@ -65,6 +72,38 @@
                   style="width: 50%"
                   class="white card-search"
                 >
+                  <v-layout
+                    v-if="
+                      isSearching &&
+                      isGetSameMovieTypeSearching &&
+                      searchMovieItems.length === 0
+                    "
+                    class="d-flex flex-column mt-2"
+                    justify-center
+                    align-center
+                  >
+                    <v-progress-circular
+                      :size="64"
+                      color="black"
+                      indeterminate
+                    ></v-progress-circular>
+                    <span class="h3 font-italic font-weight-bold">
+                      Đang tìm kiếm phim phù hợp, vui lòng đợii ...</span
+                    >
+                  </v-layout>
+                  <v-layout
+                    v-if="
+                      isSearching &&
+                      !isGetSameMovieTypeSearching &&
+                      searchMovieItems.length === 0
+                    "
+                    class="mt-5 ml-5"
+                    align-start
+                  >
+                    <span class="h3 font-italic font-weight-bold">
+                      Không tìm thấy phim phù hợp.</span
+                    >
+                  </v-layout>
                   <v-list two-line>
                     <v-list-item-group v-model="selectedSearchMovie">
                       <v-list-item
@@ -147,6 +186,19 @@
                 ></v-col>
                 <v-col>
                   <v-autocomplete
+                    v-model="searchCountry"
+                    :items="countryMovieLists"
+                    item-text="name"
+                    @change="searchMovies"
+                    label="Quốc gia"
+                    outlined
+                    dense
+                    return-object
+                  >
+                  </v-autocomplete
+                ></v-col>
+                <v-col>
+                  <v-autocomplete
                     v-model="searchSortBy"
                     :items="sortByLists"
                     item-text="name"
@@ -160,7 +212,11 @@
                 ></v-col>
                 <v-col
                   v-if="
-                    searchStatus || searchCategory || searchSortBy || searchType
+                    searchStatus ||
+                    searchCategory ||
+                    searchSortBy ||
+                    searchType ||
+                    searchCountry
                   "
                 >
                   <v-btn color="error" @click="removeFilterSearch"
@@ -173,7 +229,20 @@
           </v-row>
           <v-row>
             <v-col
-              v-for="(file, f) in hotMoviesItems"
+              v-if="
+                itemMovieLists.length === 0 &&
+                textSnackbar === 'Không tìm thấy phim phù hợp'
+              "
+              cols="12"
+              sm="12"
+              lg="12"
+              xl="12"
+              md="12"
+              >{{ textSnackbar }}
+              <v-icon>mdi-emoticon-sad-outline</v-icon></v-col
+            >
+            <v-col
+              v-for="(file, f) in itemMovieLists"
               :key="f"
               cols="12"
               sm="6"
@@ -181,7 +250,7 @@
               xl="3"
               md="3"
             >
-              <v-card :href="file.link" class="mx-auto" max-width="400">
+              <v-card class="mx-auto" max-width="400">
                 <v-menu
                   open-on-hover
                   open-delay="1000"
@@ -190,32 +259,20 @@
                   offset-x
                 >
                   <template v-slot:activator="{ on, attrs }">
-                    <v-img
-                      v-bind="attrs"
-                      v-on="on"
-                      class="white--text align-start"
-                      height="170px"
-                      :src="file.image"
-                    >
-                      <v-row class="pa-4 d-flex justify-space-between mt-n1">
-                        <v-avatar
-                          :color="file.status === 'HOT' ? 'error' : 'green'"
-                          size="50"
+                    <div class="image-container" v-bind="attrs" v-on="on">
+                      <v-img
+                        class="white--text align-start"
+                        height="200px"
+                        :src="file.image"
+                        contain
+                      >
+                      </v-img>
+                      <div class="overlay">
+                        <v-btn fab large :to="file.link">
+                          <v-icon>mdi-play</v-icon></v-btn
                         >
-                          <span class="white--text text-h7">{{
-                            file.status
-                          }}</span>
-                        </v-avatar>
-                        <v-avatar
-                          class="d-flex flex-column"
-                          color="indigo"
-                          size="50"
-                        >
-                          <span class="white--text text-h7">Tập</span>
-                          <span class="white--text text-h7">{{ file.ep }}</span>
-                        </v-avatar>
-                      </v-row>
-                    </v-img>
+                      </div>
+                    </div>
                   </template>
                   <v-card max-height="400">
                     <v-list>
@@ -224,7 +281,9 @@
                           <v-list-item-title
                             class="orange--text font-weight-bold"
                           >
-                            {{ file.title }}</v-list-item-title
+                            {{
+                              file.title + ' (' + file.year_of_manufacture + ')'
+                            }}</v-list-item-title
                           >
                           <v-list-item-subtitle
                             class="text--primary font-italic"
@@ -244,7 +303,8 @@
 
                         <v-list-item-content class="ml-n5">
                           <v-list-item-title
-                            >Thời lượng: ~24 phút/tập</v-list-item-title
+                            >Thời lượng: ~
+                            {{ file.time }} phút/tập</v-list-item-title
                           >
                         </v-list-item-content>
                       </v-list-item>
@@ -254,9 +314,15 @@
                         </v-list-item-icon>
 
                         <v-list-item-content class="ml-n5">
-                          <v-list-item-title
-                            >Diễn viên: <a>Jennifer Aniston</a>,
-                            <a>Courteney Cox</a>,<a>Lisa Kudrow</a>
+                          <v-list-item-title>
+                            Diễn viên:
+                            <template v-for="movie_actor in file.movie_actors">
+                              <a
+                                @click="toLinkSearch('actor', movie_actor)"
+                                style="text-decoration: none"
+                                >{{ movie_actor.actor.name + ' ' }},
+                              </a>
+                            </template>
                           </v-list-item-title>
                         </v-list-item-content>
                       </v-list-item>
@@ -266,10 +332,20 @@
                         </v-list-item-icon>
 
                         <v-list-item-content class="ml-n5">
-                          <v-list-item-title
-                            >Thể loại: <a>Tình cảm</a
-                            ><a> Hài hước</a></v-list-item-title
-                          >
+                          <v-list-item-title>
+                            Thể loại:
+                            <template
+                              v-for="movie_category in file.movie_categories"
+                            >
+                              <a
+                                @click="
+                                  toLinkSearch('category', movie_category)
+                                "
+                                style="text-decoration: none"
+                                >{{ movie_category.category.name + ' ' }},
+                              </a></template
+                            >
+                          </v-list-item-title>
                         </v-list-item-content>
                       </v-list-item>
                       <v-list-item dense>
@@ -278,8 +354,11 @@
                         </v-list-item-icon>
 
                         <v-list-item-content class="ml-n5">
-                          <v-list-item-title
-                            >Quốc gia: UNITED STATES</v-list-item-title
+                          <v-list-item-title>
+                            Quốc gia:
+                            <a @click="toLinkSearch('country', file.country)"
+                              >{{ file.country.name }}
+                            </a></v-list-item-title
                           >
                         </v-list-item-content>
                       </v-list-item>
@@ -290,7 +369,10 @@
 
                         <v-list-item-content class="ml-n5">
                           <v-list-item-title
-                            >Năm sản xuất: 1994</v-list-item-title
+                            >Năm sản xuất:
+                            {{
+                              ' ' + file.year_of_manufacture
+                            }}</v-list-item-title
                           >
                         </v-list-item-content>
                       </v-list-item>
@@ -298,40 +380,54 @@
                   </v-card>
                 </v-menu>
                 <v-card-title>
-                  <v-row class="d-flex justify-space-between">
-                    <v-chip x-small draggable>
-                      {{ file.type.toUpperCase() }}
-                    </v-chip>
-                    <v-chip x-small draggable>
-                      <v-icon small left> mdi-account </v-icon>
-                      {{ file.view }} lượt xem
-                    </v-chip>
+                  <v-row class="d-flex flex-column">
+                    <v-col class="d-flex justify-space-between">
+                      <v-chip x-small draggable>
+                        {{ file.type.toUpperCase() }}
+                      </v-chip>
+                      <v-chip x-small draggable>
+                        <v-icon small left> mdi-eye </v-icon>
+                        {{ file.view }} lượt xem
+                      </v-chip>
+                    </v-col>
+                    <v-col class="d-flex">
+                      <nuxt-link :to="file.link">
+                        <span
+                          class="d-inline-block text-truncate hover-title red--text"
+                          style="font-size: 16px; max-width: 180px"
+                        >
+                          {{
+                            file.title + ' (' + file.year_of_manufacture + ')'
+                          }}
+                        </span></nuxt-link
+                      >
+                    </v-col>
                   </v-row>
-                  <span
-                    class="d-inline-block text-truncate mt-2 ml-n3"
-                    style="max-width: 220px; font-size: 20px"
-                  >
-                    {{ file.title }}
-                  </span></v-card-title
+                </v-card-title>
+                <v-card-subtitle
+                  class="d-inline-block text-truncate font-italic font-weight-medium orange--text"
+                  style="max-width: 220px"
                 >
-                <v-card-subtitle>
-                  <span
-                    class="d-inline-block text-truncate font-italic ml-n3"
-                    style="max-width: 220px"
-                  >
-                    {{ file.subtitle }}
-                  </span>
+                  {{ file.subtitle }}
                 </v-card-subtitle>
-              </v-card></v-col
-            >
+              </v-card>
+            </v-col>
+            <v-col v-if="loadingMovie" cols="12" sm="6" lg="3" xl="3" md="3">
+              <v-skeleton-loader
+                class="mx-auto"
+                max-width="400"
+                type="card"
+              ></v-skeleton-loader>
+            </v-col>
           </v-row>
           <v-row justify="center">
             <v-col cols="12">
               <v-container class="max-width">
                 <v-pagination
+                  v-if="itemMovieLists.length > 0"
                   v-model="page"
                   class="my-4"
-                  :length="15"
+                  :length="totalMovie"
                   navigation-color="error"
                   color="error"
                 ></v-pagination>
@@ -346,101 +442,87 @@
 </template>
 
 <script>
+import axios from 'axios'
+import gql from 'graphql-tag'
+
 export default {
+  async fetch() {
+    // Gọi các truy vấn GraphQL thông qua Apollo Client
+    const data = await this.$apollo.query({
+      query: gql(`query MyQuery {
+            categories(where: {is_delete: {_eq: false}}) {
+              id
+              code
+              name
+            }
+            countries(where: {is_delete: {_eq: false}}) {
+              id
+              code
+              name
+            }
+          }
+           `),
+    })
+    if (data && data.data) {
+      this.categoryMovieLists = []
+      this.countryMovieLists = []
+      this.categoryMovieLists = data.data.categories
+      this.countryMovieLists = data.data.countries
+      if (
+        this.$router.currentRoute.name === 'search' &&
+        this.$router.currentRoute.query.status
+      ) {
+        const checkStatus = this.statusMovieLists.find(
+          (e) => e.code === this.$router.currentRoute.query.status
+        )
+        if (checkStatus) {
+          this.searchStatus = checkStatus
+        }
+      }
+      if (
+        this.$router.currentRoute.name === 'search' &&
+        this.$router.currentRoute.query.category
+      ) {
+        const checkCategory = this.categoryMovieLists.find(
+          (e) => e.code === this.$router.currentRoute.query.category
+        )
+
+        if (checkCategory) {
+          this.searchCategory = checkCategory
+        }
+      }
+
+      if (
+        this.$router.currentRoute.name === 'search' &&
+        this.$router.currentRoute.query.country
+      ) {
+        const checkCountry = this.countryMovieLists.find(
+          (e) => e.code === this.$router.currentRoute.query.country
+        )
+        if (checkCountry) {
+          this.searchCountry = checkCountry
+        }
+      }
+    }
+    this.searchMovies()
+  },
   layout: 'default',
   data() {
     return {
       loadingText: 'Đang cập nhật dữ liệu, bạn chờ tí nhé ...',
       snackbar: false,
       textSnackbar: '',
-      dialogLoading: false,
+      loadingMovie: false,
       page: 1,
+      limit: 8,
+      offset: 0,
+      totalMovie: 0,
       cycle: true,
       tabsViewMovie: null,
       tabsViewMovieSeries: null,
-      hotMoviesItems: [
-        {
-          ep: '24',
-          type: 'series',
-          view: 15000,
-          status: 'HOT',
-          image: require('~/static/friend-1.jpg'),
-          subtitle: 'Những người bạn mùa 1',
-          title: 'FRIENDS SEASON 1',
-          link: '/movies/friend-season-1',
-        },
-        {
-          ep: '28',
-          type: 'series',
-          view: 75412,
-          status: 'HOT',
-          image: require('~/static/friend-2.jpg'),
-          subtitle: 'Những người bạn mùa 2',
-          title: 'FRIENDS SEASON 2',
-          link: '/movies/friend-season-2',
-        },
-        {
-          ep: '30',
-          type: 'series',
-          view: 12154,
-          status: 'HOT',
-          image: require('~/static/friend-3.jpg'),
-          subtitle: 'Những người bạn mùa 3',
-          title: 'FRIENDS SEASON 3',
-          link: '/movies/friend-season-3',
-        },
-        {
-          ep: '24',
-          type: 'series',
-          view: 21200,
-          status: 'HOT',
-          image: require('~/static/friend-4.jpg'),
-          subtitle: 'Những người bạn mùa 4',
-          title: 'FRIENDS SEASON 4',
-          link: '/movies/friend-season-4',
-        },
-        {
-          ep: '19',
-          type: 'series',
-          view: 65187,
-          status: 'HOT',
-          image: require('~/static/friend-5.jpg'),
-          subtitle: 'Những người bạn mùa 5',
-          title: 'FRIENDS SEASON 5',
-          link: '/movies/friend-season-5',
-        },
-        {
-          ep: '20',
-          type: 'series',
-          view: 26510,
-          status: 'HOT',
-          image: require('~/static/friend-6.jpg'),
-          subtitle: 'Những người bạn mùa 6',
-          title: 'FRIENDS SEASON 6',
-          link: '/movies/friend-season-6',
-        },
-        {
-          ep: '26',
-          type: 'series',
-          view: 1000,
-          status: 'NEW',
-          image: require('~/static/friend-7.jpg'),
-          subtitle: 'Những người bạn mùa 7',
-          title: 'FRIENDS SEASON 7',
-          link: '/movies/friend-season-7',
-        },
-        {
-          ep: '24',
-          type: 'series',
-          view: 500,
-          status: 'NEW',
-          image: require('~/static/friend-8.jpg'),
-          subtitle: 'Những người bạn mùa 8',
-          title: 'FRIENDS SEASON 8',
-          link: '/movies/friend-season-8',
-        },
-      ],
+      itemMovieLists: [],
       isSearching: false,
+      isGetSameMovieTypeSearching: false,
       isLoading: false,
       textSearchMovie: '',
       selectedSearchMovie: null,
@@ -502,16 +584,8 @@ export default {
           link: '/movies/friend-season-8',
         },
       ],
-      categoryMovieLists: [
-        {
-          code: 'action',
-          name: 'Hành động',
-        },
-        {
-          code: 'romantic',
-          name: 'Tình cảm',
-        },
-      ],
+      categoryMovieLists: [],
+      countryMovieLists: [],
       typeMovieLists: [
         {
           code: 'single',
@@ -527,10 +601,10 @@ export default {
           code: 'latest',
           name: 'Mới cập nhật',
         },
-        {
-          code: 'popular',
-          name: 'Phim xem nhiều',
-        },
+        // {
+        //   code: 'popular',
+        //   name: 'Phim xem nhiều',
+        // },
         {
           code: 'recommended',
           name: 'Phim nổi bật',
@@ -538,44 +612,134 @@ export default {
       ],
       sortByLists: [
         {
-          code: 'year',
-          name: 'Năm sản xuất',
+          code: 'year_of_manufacture',
+          type: 'desc',
+          name: 'Năm sản xuất (Từ cao xuống thấp)',
+        },
+        {
+          code: 'year_of_manufacture',
+          type: 'asc',
+          name: 'Năm sản xuất (Từ thấp lên cao)',
         },
         {
           code: 'view',
-          name: 'Lượt xem',
+          type: 'desc',
+          name: 'Lượt xem (Từ cao xuống thấp)',
+        },
+        {
+          code: 'view',
+          type: 'asc',
+          name: 'Lượt xem (Từ thấp lên cao)',
         },
       ],
+      searchCountry: null,
       searchCategory: null,
       searchType: null,
       searchStatus: null,
       searchSortBy: null,
     }
   },
-  mounted() {
-    this.removeQueryParams()
+  created() {
+    // this.searchMovies()
   },
+  mounted() {},
   computed: {},
   watch: {
-    dialogLoading(val) {
+    loadingMovie(val) {
       if (!val) return
 
       setTimeout(() => this.closeDialog(), 4000)
     },
+    page() {
+      this.offset = (this.page - 1) * this.limit
+      this.searchMovies()
+    },
   },
   methods: {
     closeDialog() {
-      this.dialogLoading = false
-      this.dialogFeedback = false
-      this.dialogRecommend = false
-      this.loadingText = 'Đang cập nhật dữ liệu, bạn chờ tí nhé ...'
-      this.snackbar = true
-      this.textSnackbar = 'Hệ thống đã ghi nhận, cảm ơn bạn đã đánh giá'
+      this.loadingMovie = false
+      // this.loadingText = 'Đang cập nhật dữ liệu, bạn chờ tí nhé ...'
+      // this.snackbar = true
+      // this.textSnackbar = 'Hệ thống đã ghi nhận, cảm ơn bạn đã đánh giá'
     },
-    typeSearchInput() {
+    async typeSearchInput() {
+      if (this.isGetSameMovieTypeSearching) {
+        console.log('Đang tiến hành search')
+        return
+      }
       if (this.textSearchMovie && this.textSearchMovie.length > 0) {
+        this.isGetSameMovieTypeSearching = true
         this.isSearching = true
+        this.searchMovieItems = []
+        try {
+          const stringSearch = `where: {_or: [
+          {name: {_ilike: "%${this.textSearchMovie}%"}},
+          {name_en: {_ilike: "%${this.textSearchMovie}%"}}
+          ]},`
+          const resData = await axios.post(
+            `${process.env.URL_SERVER}/api/get-movie-type-input-search`,
+            { textSearch: stringSearch }
+          )
+          if (resData && resData.data && resData.data.status) {
+            if (resData.data && resData.data.dataMovies.length > 0) {
+              const tempMovieItem = []
+              for (
+                let index = 0;
+                index < resData.data.dataMovies.length;
+                index++
+              ) {
+                const element = resData.data.dataMovies[index]
+                const movieItem = {}
+                movieItem.id = element.id
+                movieItem.view = element.view
+                movieItem.title = element.name_en.toUpperCase()
+                movieItem.subtitle = element.name
+                movieItem.link = '/movies/' + element.code
+                for (
+                  let indexI = 0;
+                  indexI < element.movie_images.length;
+                  indexI++
+                ) {
+                  const elementImage = element.movie_images[indexI]
+
+                  if (elementImage.type_image === 'image' && elementImage.url) {
+                    const images = this.$fire.storage
+                      .ref()
+                      .child('movies/images/')
+                    const image = images.child(elementImage.url)
+                    await image.getDownloadURL().then((url) => {
+                      movieItem.image = url
+                    })
+                  }
+                  if (
+                    elementImage.type_image === 'banner' &&
+                    elementImage.url
+                  ) {
+                    const images = this.$fire.storage
+                      .ref()
+                      .child('movies/banners/')
+                    const image = images.child(elementImage.url)
+                    await image.getDownloadURL().then((url) => {
+                      movieItem.banner = url
+                    })
+                  }
+                }
+                tempMovieItem.push(movieItem)
+              }
+              this.searchMovieItems = tempMovieItem
+              this.isGetSameMovieTypeSearching = false
+            }
+          } else {
+            this.searchMovieItems = []
+            this.isGetSameMovieTypeSearching = false
+          }
+        } catch (error) {
+          console.log(error)
+          this.isGetSameMovieTypeSearching = false
+          this.isSearching = false
+        }
       } else {
+        this.isGetSameMovieTypeSearching = false
         this.isSearching = false
       }
     },
@@ -596,46 +760,298 @@ export default {
       if (this.searchSortBy) {
         url.searchParams.delete('sortBy')
       }
+      if (this.searchCountry) {
+        url.searchParams.delete('country')
+      }
       window.history.replaceState({}, '', url.href)
+      this.textSnackbar = ''
+      this.snackbar = false
       this.searchCategory = null
       this.searchType = null
       this.searchSortBy = null
       this.searchStatus = null
+      this.searchCountry = null
+      this.page = 1
+      this.offset = 0
+      this.searchMovies()
     },
     removeQueryParams() {
       const url = new URL(window.location.href)
       url.search = ''
       window.history.replaceState({}, '', url.href)
     },
-    searchMovies() {
+    async searchMovies() {
+      let stringOrder = ''
+      let stringSearch = ''
       const queryParams = {}
       if (this.textSearchMovie && this.textSearchMovie !== '') {
         const textSearch = this.textSearchMovie.split(' ').join('+')
+        stringSearch = `_or: [
+          {name: {_ilike: "%${this.textSearchMovie}%"}},
+          {name_en: {_ilike: "%${this.textSearchMovie}%"}}
+      ],
+        `
         queryParams.text = textSearch
       }
       if (this.searchCategory) {
         const categorySearch = this.searchCategory.code
+        stringSearch += `
+        movie_categories: {category: {code: {_eq: "${this.searchCategory.code}"}}},
+        `
         queryParams.category = categorySearch
+      }
+      if (this.searchCountry) {
+        const countrySearch = this.searchCountry.code
+        stringSearch += `
+        country: {code: {_eq: ${this.searchCountry.code}}},
+        `
+        queryParams.country = countrySearch
       }
       if (this.searchType) {
         const typeSearch = this.searchType.code
+        stringSearch += `
+        movie_type: {_eq: "${this.searchType.code}"},
+        `
         queryParams.type = typeSearch
       }
       if (this.searchStatus) {
         const statusSearch = this.searchStatus.code
+        stringSearch += `
+        movie_status: {_eq: "${this.searchStatus.code}"},
+        `
         queryParams.status = statusSearch
       }
       if (this.searchSortBy) {
+        stringOrder = `, order_by : {${this.searchSortBy.code} : ${this.searchSortBy.type} }`
         const sortSearch = this.searchSortBy.code
         queryParams.sortBy = sortSearch
       }
+      const stringSearchSend = `where: {${stringSearch}}`
       this.$router.push({ path: '/search', query: queryParams })
+      const stringSearchParams = {}
+      stringSearchParams.sort = stringOrder
+      stringSearchParams.stringSearch = stringSearchSend
+      stringSearchParams.limit = this.limit
+      stringSearchParams.offset = this.offset
+      try {
+        this.loadingMovie = true
+        const resData = await axios.post(
+          `${process.env.URL_SERVER}/api/get-movie-search`,
+          stringSearchParams
+        )
+        if (resData && resData.data && resData.data.status) {
+          if (resData.data && resData.data.dataMovies.length > 0) {
+            this.itemMovieLists = []
+            for (
+              let index = 0;
+              index < resData.data.dataMovies.length;
+              index++
+            ) {
+              const element = resData.data.dataMovies[index]
+              const movieItem = {}
+              movieItem.id = element.id
+              movieItem.ep = element.total_episode
+              movieItem.type = element.movie_type
+              movieItem.status = element.movie_status
+              movieItem.view = element.view
+              movieItem.title = element.name_en.toUpperCase()
+              movieItem.subtitle = element.name
+              movieItem.link = '/movies/' + element.code
+              movieItem.country = element.country
+              movieItem.year_of_manufacture = element.year_of_manufacture
+              movieItem.time = element.time
+              for (
+                let indexI = 0;
+                indexI < element.movie_images.length;
+                indexI++
+              ) {
+                const elementImage = element.movie_images[indexI]
+
+                if (elementImage.type_image === 'image' && elementImage.url) {
+                  const images = this.$fire.storage
+                    .ref()
+                    .child('movies/images/')
+                  const image = images.child(elementImage.url)
+                  await image.getDownloadURL().then((url) => {
+                    movieItem.image = url
+                  })
+                }
+                if (elementImage.type_image === 'banner' && elementImage.url) {
+                  const images = this.$fire.storage
+                    .ref()
+                    .child('movies/banners/')
+                  const image = images.child(elementImage.url)
+                  await image.getDownloadURL().then((url) => {
+                    movieItem.banner = url
+                  })
+                }
+              }
+              if (element.movie_categories.length > 0) {
+                movieItem.movie_categories = element.movie_categories
+              }
+              if (element.movie_actors.length > 0) {
+                movieItem.movie_actors = element.movie_actors
+              }
+              this.itemMovieLists.push(movieItem)
+            }
+            this.loadingMovie = false
+          }
+          if (resData.data && resData.data.dataTotal) {
+            this.totalMovie = Math.ceil(resData.data.dataTotal / this.limit)
+          }
+        } else {
+          this.itemMovieLists = []
+          this.loadingMovie = false
+          this.snackbar = true
+          this.textSnackbar = 'Không tìm thấy phim phù hợp'
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    toLinkSearch(type, item) {
+      if (type === 'country') {
+        this.$router.push({ path: '/search', query: { country: item.code } })
+        this.searchCountry = item
+        this.searchMovies()
+      }
+      if (type === 'category') {
+        this.$router.push({
+          path: '/search',
+          query: { category: item.category.code },
+        })
+        this.searchCategory = item.category
+        this.searchMovies()
+      }
+      if (type === 'actor') {
+        this.$router.push({ path: `/actors/${item.actor.code}` })
+      }
     },
     linkToMovieDetail(item) {
       this.$router.push({
         path: `/movies/${item.title}`,
       })
     },
+  },
+  apollo: {
+    // getData: {
+    //   query() {
+    //     const query = gql(`query MyQuery {
+    //         categories(where: {is_delete: {_eq: false}}) {
+    //           id
+    //           code
+    //           name
+    //         }
+    //         countries(where: {is_delete: {_eq: false}}) {
+    //           id
+    //           code
+    //           name
+    //         }
+    //       }
+    //        `)
+    //     return query
+    //   },
+    //   update: (data) => {},
+    //   result({ data }) {
+    //     this.categoryMovieLists = []
+    //     this.countryMovieLists = []
+    //     this.categoryMovieLists = data.categories
+    //     this.countryMovieLists = data.countries
+    //     // this.newMoviesItems = []
+    //     // this.itemMovieLists = []
+    //     // if (data && data.movies_latest.length > 0) {
+    //     //   for (let index = 0; index < data.movies_latest.length; index++) {
+    //     //     const element = data.movies_latest[index]
+    //     //     const movieItem = {}
+    //     //     movieItem.id = element.id
+    //     //     movieItem.ep = element.total_episode
+    //     //     movieItem.type = element.movie_type
+    //     //     movieItem.status = element.movie_status
+    //     //     movieItem.view = element.view
+    //     //     movieItem.title = element.name_en.toUpperCase()
+    //     //     movieItem.subtitle = element.name
+    //     //     movieItem.link = '/movies/' + element.code
+    //     //     movieItem.country = element.country.name
+    //     //     movieItem.year_of_manufacture = element.year_of_manufacture
+    //     //     movieItem.time = element.time
+    //     //     for (
+    //     //       let indexI = 0;
+    //     //       indexI < element.movie_images.length;
+    //     //       indexI++
+    //     //     ) {
+    //     //       const elementImage = element.movie_images[indexI]
+    //     //       console.log(elementImage)
+    //     //       if (elementImage.type_image === 'image' && elementImage.url) {
+    //     //         const images = this.$fire.storage.ref().child('movies/images/')
+    //     //         const image = images.child(elementImage.url)
+    //     //         await image.getDownloadURL().then((url) => {
+    //     //           movieItem.image = url
+    //     //         })
+    //     //       }
+    //     //       if (elementImage.type_image === 'banner' && elementImage.url) {
+    //     //         const images = this.$fire.storage.ref().child('movies/banners/')
+    //     //         const image = images.child(elementImage.url)
+    //     //         await image.getDownloadURL().then((url) => {
+    //     //           movieItem.banner = url
+    //     //         })
+    //     //       }
+    //     //     }
+    //     //     if (element.movie_categories.length > 0) {
+    //     //       movieItem.movie_categories = element.movie_categories
+    //     //     }
+    //     //     if (element.movie_actors.length > 0) {
+    //     //       movieItem.movie_actors = element.movie_actors
+    //     //     }
+    //     //     this.newMoviesItems.push(movieItem)
+    //     //   }
+    //     // }
+    //     // if (data && data.movies_recommended.length > 0) {
+    //     //   for (let index = 0; index < data.movies_recommended.length; index++) {
+    //     //     const element = data.movies_recommended[index]
+    //     //     const movieItem = {}
+    //     //     movieItem.id = element.id
+    //     //     movieItem.ep = element.total_episode
+    //     //     movieItem.type = element.movie_type
+    //     //     movieItem.status = element.movie_status
+    //     //     movieItem.view = element.view
+    //     //     movieItem.title = element.name_en.toUpperCase()
+    //     //     movieItem.subtitle = element.name
+    //     //     movieItem.link = '/movies/' + element.code
+    //     //     movieItem.country = element.country.name
+    //     //     movieItem.year_of_manufacture = element.year_of_manufacture
+    //     //     movieItem.time = element.time
+    //     //     for (
+    //     //       let indexI = 0;
+    //     //       indexI < element.movie_images.length;
+    //     //       indexI++
+    //     //     ) {
+    //     //       const elementImage = element.movie_images[indexI]
+    //     //       if (elementImage.type_image === 'image' && elementImage.url) {
+    //     //         const images = this.$fire.storage.ref().child('movies/images/')
+    //     //         const image = images.child(elementImage.url)
+    //     //         await image.getDownloadURL().then((url) => {
+    //     //           movieItem.image = url
+    //     //         })
+    //     //       }
+    //     //       if (elementImage.type_image === 'banner' && elementImage.url) {
+    //     //         const images = this.$fire.storage.ref().child('movies/banners/')
+    //     //         const image = images.child(elementImage.url)
+    //     //         await image.getDownloadURL().then((url) => {
+    //     //           movieItem.banner = url
+    //     //         })
+    //     //       }
+    //     //     }
+    //     //     if (element.movie_categories.length > 0) {
+    //     //       movieItem.movie_categories = element.movie_categories
+    //     //     }
+    //     //     if (element.movie_actors.length > 0) {
+    //     //       movieItem.movie_actors = element.movie_actors
+    //     //     }
+    //     //     this.itemMovieLists.push(movieItem)
+    //     //   }
+    //     // }
+    //   },
+    // },
   },
 }
 </script>
@@ -644,5 +1060,31 @@ export default {
   position: absolute;
   z-index: 2;
   margin-top: -20px;
+}
+.hover-title:hover {
+  color: orange;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.image-container {
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay:hover {
+  opacity: 1;
 }
 </style>

@@ -16,7 +16,7 @@
         data-aos-delay="500"
         class="mx-auto"
       ></v-card-text> -->
-      <v-img
+      <!-- <v-img
         data-aos="zoom-in"
         data-aos-duration="1500"
         data-aos-delay="500"
@@ -34,7 +34,7 @@
         </v-btn></v-card-actions
       >
 
-      <v-divider class="d-flex mx-auto"></v-divider>
+      <v-divider class="d-flex mx-auto"></v-divider> -->
 
       <v-row
         data-aos="fade-left"
