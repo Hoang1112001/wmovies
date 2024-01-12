@@ -82,7 +82,7 @@
         </v-row>
         <v-row>
           <v-col>
-            <v-card class="mt-4 mx-auto" max-width="1000">
+            <!-- <v-card class="mt-4 mx-auto" max-width="1000">
               <v-sheet
                 class="v-sheet--offset mx-auto"
                 color="error"
@@ -108,7 +108,7 @@
                   Cập nhật 26 giây trước</span
                 >
               </v-card-text>
-            </v-card>
+            </v-card> -->
           </v-col>
         </v-row>
       </v-card-text>
