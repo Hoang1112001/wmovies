@@ -104,6 +104,7 @@ export default {
   },
   layout: 'default',
   data: () => ({
+    userInfo: null,
     rules: {
       required: (value) => !!value || 'Bắt buộc nhập.',
       min: (v) => v.length >= 8 || 'Thấp nhất 8 kí tự',

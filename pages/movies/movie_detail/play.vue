@@ -299,6 +299,173 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogSignIn" max-width="600px" min-width="360px" eager>
+      <div>
+        <v-tabs
+          v-model="tabSignIn"
+          show-arrows
+          background-color="error accent-4"
+          icons-and-text
+          dark
+          grow
+          eager
+        >
+          <v-tabs-slider color="purple darken-4"></v-tabs-slider>
+          <v-tab v-for="i in tabsSignIn" :key="i.name">
+            <v-icon large>{{ i.icon }}</v-icon>
+            <div class="caption py-1">{{ i.name }}</div>
+          </v-tab>
+          <v-tab-item eager>
+            <v-card class="px-4">
+              <v-card-text>
+                <v-form ref="formLogin" v-model="valid" lazy-validation>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field
+                        outlined
+                        dense
+                        prepend-icon="mdi-email-outline"
+                        v-model="signInItem.email"
+                        :rules="loginEmailRules"
+                        label="E-mail"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        outlined
+                        dense
+                        prepend-icon="mdi-key-variant"
+                        v-model="signInItem.password"
+                        :append-icon="showPass ? 'eye' : 'eye-off'"
+                        :rules="[rules.required, rules.min]"
+                        :type="showPass ? 'text' : 'password'"
+                        name="input-10-1"
+                        label="Mật khẩu"
+                        class="mt-n5"
+                        hint="Tối thiểu 8 kí tự"
+                        counter
+                        @click:append="showPass = !showPass"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" class="d-flex justify-space-between mt-n3">
+                      <v-btn
+                        @click="toLink('forgot_password')"
+                        color="error"
+                        small
+                        dense
+                        text
+                        >Quên mật khẩu</v-btn
+                      >
+                      <v-spacer></v-spacer>
+
+                      <v-col cols="12" lg="3" md="3" sm="3" xsm="3">
+                        <v-btn
+                          block
+                          dense
+                          color="error"
+                          @click="loginUser()"
+                          class="mt-n3"
+                        >
+                          Đăng nhập
+                        </v-btn>
+                      </v-col>
+                    </v-col>
+
+                    <v-col cols="12" class="d-flex justify-space-between">
+                      <v-divider></v-divider
+                      ><span class="pa-2 mt-n5">HOẶC</span>
+                      <v-divider></v-divider>
+                    </v-col>
+                    <v-col cols="12" class="d-flex justify-space-around">
+                      <v-btn
+                        outlined
+                        color="warning"
+                        @click="loginUserWithGoogle"
+                        ><v-icon>mdi-google</v-icon>Đăng nhập với google</v-btn
+                      >
+                    </v-col>
+                    <v-col class="d-flex" cols="12" sm="6" xsm="12"></v-col>
+                  </v-row>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
+          <v-tab-item eager>
+            <v-card class="px-4">
+              <v-card-text>
+                <v-form ref="formRegister" v-model="valid" lazy-validation>
+                  <v-row>
+                    <v-col cols="12">
+                      <v-text-field
+                        outlined
+                        dense
+                        prepend-icon="mdi-account"
+                        v-model="signUpItem.username"
+                        label="Tên người dùng"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        outlined
+                        dense
+                        class="mt-n5"
+                        prepend-icon="mdi-email-outline"
+                        v-model="signUpItem.email"
+                        :rules="emailRules"
+                        label="E-mail"
+                        required
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        outlined
+                        dense
+                        class="mt-n5"
+                        prepend-icon="mdi-key-variant"
+                        v-model="signUpItem.password"
+                        :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
+                        :rules="[rules.required, rules.min]"
+                        :type="showPass ? 'text' : 'password'"
+                        name="input-10-1"
+                        label="Mật khẩu"
+                        hint="Tối thiểu 8 kí tự"
+                        counter
+                        @click:append="showPass = !showPass"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-text-field
+                        block
+                        outlined
+                        dense
+                        class="mt-n5"
+                        prepend-icon="mdi-key-change"
+                        v-model="signUpItem.verify"
+                        :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
+                        :rules="[rules.required, passwordMatch]"
+                        :type="showPass ? 'text' : 'password'"
+                        name="input-10-1"
+                        label="Xác nhận mật khẩu"
+                        counter
+                        @click:append="showPass = !showPass"
+                      ></v-text-field>
+                    </v-col>
+                    <v-spacer></v-spacer>
+                    <v-col class="d-flex ml-auto" cols="12" sm="3" xsm="12">
+                      <v-btn block color="error" @click="registerUser"
+                        >Đăng ký</v-btn
+                      >
+                    </v-col>
+                  </v-row>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </v-tab-item>
+        </v-tabs>
+      </div>
+    </v-dialog>
     <v-dialog v-model="dialogEditComment" max-width="500">
       <v-card>
         <v-card-text>
@@ -388,7 +555,7 @@
                       :src="dataEpisode.url_sub_vi"
                     />
                   </video>
-                  <div class="subtitles-container">
+                  <div v-if="!isEndTimeTrial" class="subtitles-container">
                     <div
                       v-if="
                         selectedSubtitle === 'en' ||
@@ -566,6 +733,22 @@
                         </v-btn>
                       </v-col>
                     </div>
+                  </div>
+                  <div v-else class="subtitles-container">
+                    <div class="overlay-movie d-flex flex-column">
+                      <h3>
+                        Bạn đã hết thời gian trải nghiệm, vui lòng đăng nhập và
+                        tiến hành kích hoạt VIP để tiếp tục
+                      </h3>
+                      <v-btn class="mt-2" color="yellow" @click="activeVIP"
+                        >Kích hoạt vip <v-icon>mdi-chess-queen</v-icon></v-btn
+                      >
+                    </div>
+
+                    <!-- <v-overlay absolute opacity>
+                      Bạn đã hết thời gian trải nghiệm, vui lòng nạp vip để tiếp
+                      tục</v-overlay
+                    > -->
                   </div>
                 </div>
               </v-col>
@@ -811,8 +994,8 @@
                   </p>
                   <p class="font-weight-bold text-justify">
                     <span>Quốc gia:</span>
-                    <a @click="toLinkSearch('country', item)">{{
-                      movie.country
+                    <a @click="toLinkSearch('country', movie.country)">{{
+                      movie.country.name
                     }}</a>
                   </p>
                   <p class="font-weight-bold text-justify">
@@ -867,10 +1050,10 @@
                 <template v-for="(item, index) in commentMovies">
                   <v-divider></v-divider>
                   <v-list-item>
-                    <v-list-item-avatar :color="item.color">
-                      {{ item.user.username.slice(0, 1).toUpperCase() }}
+                    <v-list-item-avatar>
+                      <!-- {{ item.user.username.slice(0, 1).toUpperCase() }} -->
                       <!-- <v-icon>mdi-account</v-icon> -->
-                      <!-- <v-img :src="item.image"></v-img> -->
+                      <v-img :src="item.image_user"></v-img>
                     </v-list-item-avatar>
 
                     <v-list-item-content>
@@ -965,8 +1148,9 @@
                       >
                         <v-divider></v-divider>
                         <v-list-item>
-                          <v-list-item-avatar :color="child.color">
-                            {{ child.user.username.slice(0, 1).toUpperCase() }}
+                          <v-list-item-avatar>
+                            <v-img :src="child.image_user"></v-img>
+                            <!-- {{ child.user.username.slice(0, 1).toUpperCase() }} -->
                           </v-list-item-avatar>
                           <v-list-item-content>
                             <v-list-item-title class="font-weight-bold mt-1"
@@ -1038,7 +1222,7 @@
                 </template>
               </v-list>
               <v-pagination
-                v-show="commentMovies.length > 0"
+                v-show="commentMovies.length > 0 && lengthPanigation > 1"
                 v-model="pageComments"
                 :length="lengthPanigation"
                 :total-visible="7"
@@ -1207,46 +1391,7 @@
           </v-tabs-items>
         </v-col>
         <v-col cols="12" sm="4" lg="4" xl="4" md="4">
-          <v-card max-width="450" class="mx-auto mt-2 mr-2">
-            <v-toolbar color="error" dark>
-              <v-row class="d-flex justify-space-between ml-2 mt-2">
-                <v-toolbar-title class="font-weight-bold"
-                  >PHIM ĐỀ XUẤT
-                </v-toolbar-title>
-                <v-img
-                  class="mt-n4"
-                  max-height="68"
-                  max-width="85"
-                  :src="require('~/static/logo.png')"
-                ></v-img>
-              </v-row>
-            </v-toolbar>
-
-            <v-list three-line>
-              <template v-for="(item, index) in listViewMovies">
-                <v-divider
-                  v-if="item.divider"
-                  :key="index"
-                  :inset="item.inset"
-                ></v-divider>
-
-                <v-list-item v-else :key="item.title" :href="item.link">
-                  <v-list-item-avatar tile>
-                    <v-img :src="item.image"></v-img>
-                  </v-list-item-avatar>
-
-                  <v-list-item-content>
-                    <v-list-item-title class="orange--text font-weight-bold">{{
-                      item.title
-                    }}</v-list-item-title>
-                    <v-list-item-subtitle class="font-italic">{{
-                      item.subtitle
-                    }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </v-list>
-          </v-card>
+          <Recommend />
         </v-col>
       </v-row>
       <ChatBox />
@@ -1333,31 +1478,28 @@ import axios from 'axios'
 import gql from 'graphql-tag'
 import moment from 'moment'
 import cookie from 'cookiejs'
-// import VideoPlayer from '~/components/VideoPlayer.vue'
 import ChatBox from '~/components/ChatBot.vue'
+import Recommend from '~/components/Recommend.vue'
 
 export default {
   name: 'VideoPlay',
   components: {
-    // VideoPlayer,
+    Recommend,
     ChatBox,
   },
   async asyncData({ route, params }) {
-    console.log('route', route)
-    console.log('params', params)
-    const slug = params.slug
-    const movieE = slug
+    const movieE = decodeURIComponent(route.query.code)
     const dataQuery = {}
     let dataEpisode = null
-    dataQuery.code = params.slug
+    dataQuery.code = decodeURIComponent(route.query.code)
     dataQuery.episode = route.query.ep
 
     await axios
       .get(
-        `${process.env.URL_SERVER}/api/get-episode-movie/${params.slug}/${route.query.ep}`,
-        {
-          dataQuery,
-        }
+        `${process.env.URL_SERVER}/api/get-episode-movie/${decodeURIComponent(
+          route.query.code
+        )}/${route.query.ep}`,
+        { dataQuery }
       )
       .then((response) => {
         if (response && response.data) {
@@ -1373,12 +1515,12 @@ export default {
         console.log(error)
       })
 
-    // const movieE = slug // Hàm fetch phim theo slug name
-    // console.log(dataEpisode)
     return { movieE, dataEpisode }
   },
   data() {
     return {
+      isEndTimeTrial: false,
+      userInfo: null,
       wordLookup: {
         word: '',
         pronunciation: '',
@@ -1392,7 +1534,37 @@ export default {
       },
       tabs: null,
       title: '',
-
+      dialogSignIn: false,
+      tabSignIn: 0,
+      tabsSignIn: [
+        { name: 'Đăng nhập', icon: 'mdi-account' },
+        { name: 'Đăng ký', icon: 'mdi-television-box' },
+      ],
+      valid: true,
+      signUpItem: {
+        username: '',
+        email: '',
+        password: '',
+        verify: '',
+        oldPassword: '',
+      },
+      signInItem: {
+        email: '',
+        password: '',
+      },
+      loginEmailRules: [
+        (v) => !!v || 'E-mail không được để trống',
+        (v) => /.+@.+\..+/.test(v) || 'E-mail không hợp lệ',
+      ],
+      emailRules: [
+        (v) => !!v || 'E-mail không được để trống',
+        (v) => /.+@.+\..+/.test(v) || 'E-mail không hợp lệ',
+      ],
+      showPass: false,
+      rules: {
+        required: (value) => !!value || 'Mật khẩu không được để trống',
+        min: (v) => (v && v.length >= 8) || 'Tối thiểu 8 kí tự',
+      },
       menuOptionColorBackground: false,
       menuOptionColorSubEn: false,
       menuOptionColorSubVi: false,
@@ -1448,10 +1620,10 @@ export default {
           code: 'en-vi',
           label: 'English-Vietnam',
         },
-        {
-          code: 'vi-en',
-          label: 'Vietnam-English',
-        },
+        // {
+        //   code: 'vi-en',
+        //   label: 'Vietnam-English',
+        // },
       ],
       selectedSubtitle: null,
       // offset: true,
@@ -1477,7 +1649,6 @@ export default {
       snackbar: false,
       textSnackbar: '',
       isLikeMovie: false,
-
       movie: {
         id: null,
         code: null,
@@ -1487,6 +1658,10 @@ export default {
         time: null,
         image: null,
         content: ``,
+        country: {
+          id: null,
+          name: '',
+        },
       },
       currentEpisode: {
         id: null,
@@ -1495,47 +1670,7 @@ export default {
         url_sub_en: '',
         url_sub_vi: '',
       },
-      listViewMovies: [
-        {
-          action: '',
-          image: require('~/static/friend-1.jpg'),
-          subtitle: 'Những người bạn mùa 1',
-          title: 'FRIENDS SEASON 1',
-          link: '/movies/friend-season-1',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-2.jpg'),
-          subtitle: 'Những người bạn mùa 2',
-          title: 'FRIENDS SEASON 2',
-          link: '/movies/friend-season-2',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-3.jpg'),
-          subtitle: 'Những người bạn mùa 3',
-          title: 'FRIENDS SEASON 3',
-          link: '/movies/friend-season-3',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-4.jpg'),
-          subtitle: 'Những người bạn mùa 4',
-          title: 'FRIENDS SEASON 4',
-          link: '/movies/friend-season-4',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-5.jpg'),
-          subtitle: 'Những người bạn mùa 5',
-          title: 'FRIENDS SEASON 5',
-          link: '/movies/friend-season-5',
-        },
-      ],
+
       isLookingUp: false,
       totalComments: 0,
       commentMovies: [],
@@ -1549,14 +1684,18 @@ export default {
     }
   },
   async mounted() {
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
-    console.log('Data nè', this.dataEpisode)
-    console.log(this.$router.currentRoute)
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
+    } else {
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+        }
+      })
     }
+
     await this.loadDataMovie()
     this.loadComment(true)
     const video = this.$refs.videoPlayer
@@ -1650,6 +1789,14 @@ export default {
       await cookie.set(this.movie.code, this.currentTime)
     })
   },
+  computed: {
+    // compute field xài trên giao diện
+    passwordMatch() {
+      return () =>
+        this.signUpItem.password === this.signUpItem.verify ||
+        'Mật khẩu xác nhận không trùng với mật khẩu đã nhập'
+    },
+  },
   watch: {
     pageComments() {
       console.log(this.pageComments)
@@ -1719,39 +1866,23 @@ export default {
       this.$refs.videoPlayer.currentTime = this.currentTime
     },
     setCurrentTime() {
+      if (
+        (!this.isLogin ||
+          !this.userInfo ||
+          (this.isLogin && this.userInfo && !this.userInfo.is_active_vip)) &&
+        this.$refs.videoPlayer.currentTime >= 300
+      ) {
+        this.isPlaying = false
+        this.isEndTimeTrial = true
+        this.$refs.videoPlayer.pause()
+        return
+      }
       this.currentTime = Math.floor(this.$refs.videoPlayer.currentTime)
       if (this.isLoopCue) {
         if (this.$refs.videoPlayer.currentTime >= this.cueActive.endTime) {
           this.$refs.videoPlayer.currentTime = this.cueActive.startTime
         }
       }
-      // if ('webkitSpeechRecognition' in window) {
-      //   // eslint-disable-next-line no-use-before-define, no-undef
-      //   const SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-      //   // eslint-disable-next-line no-undef, no-use-before-define
-      //   const SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
-      //   // eslint-disable-next-line no-use-before-define, no-undef
-      //   const SpeechRecognitionEvent =
-      //     // eslint-disable-next-line no-use-before-define, no-undef
-      //     SpeechRecognitionEvent || webkitSpeechRecognitionEvent
-      //   const recognition = new SpeechRecognition()
-      //   recognition.lang = 'vi-VN'
-      //   recognition.continuous = true
-      //   recognition.onresult = function (event) {
-      //     const transcript =
-      //       event.results[event.results.length - 1][0].transcript.toLowerCase()
-      //     console.log('Người dùng nói:', transcript)
-
-      //     if (transcript.includes('chào bạn')) {
-      //       // Thực hiện hành động khi người dùng nói "hello"
-      //       alert('Chào bạn')
-      //     }
-      //   }
-      //   recognition.start()
-      //   // console.log(recognition)
-      // } else {
-      //   console.log('Trình duyệt không hỗ trợ Web Speech API.')
-      // }
     },
     formatTime(time) {
       const minutes = Math.floor(time / 60)
@@ -1821,7 +1952,7 @@ export default {
           meaning
           is_delete
         }
-      
+
             }`)
         this.$apollo
           .query({
@@ -2042,7 +2173,7 @@ export default {
             // Thiết lập ngôn ngữ và nội dung cần đọc
             utterance.lang = 'en-US' // Ngôn ngữ tiếng Anh
             utterance.text = dataWord.word // Nội dung cần đọc
-            console.log('GỌi NÈ')
+
             // Gọi phương thức speechSynthesis.speak() để đọc nội dung
             window.speechSynthesis.speak(utterance)
           } else {
@@ -2053,8 +2184,8 @@ export default {
             await axios
               .post(`${process.env.URL_SERVER}/chatbot/look-up-word`, {
                 message: `Cho biết các thông tin sau của từ "${stringSearch}",
-            trả lời theo cấu trúc json: 
-            { 
+            trả lời theo cấu trúc json:
+            {
               word: Từ cần tra ,
               pronunciation: Phiên âm từ,
               description: Mô tả ý nghĩa (tiếng Việt),
@@ -2436,7 +2567,7 @@ export default {
             movieItem.name_en = element.name_en.toUpperCase()
             movieItem.name = element.name
             movieItem.link = '/movies/' + element.code
-            movieItem.country = element.country.name
+            movieItem.country = element.country
             movieItem.year_of_manufacture = element.year_of_manufacture
             movieItem.time = element.time
             movieItem.movie_details = element.movie_details
@@ -2453,13 +2584,13 @@ export default {
                   movieItem.image = url
                 })
               }
-              if (elementImage.type_image === 'banner' && elementImage.url) {
-                const images = this.$fire.storage.ref().child('movies/banners/')
-                const image = images.child(elementImage.url)
-                await image.getDownloadURL().then((url) => {
-                  movieItem.banner = url
-                })
-              }
+              // if (elementImage.type_image === 'banner' && elementImage.url) {
+              //   const images = this.$fire.storage.ref().child('movies/banners/')
+              //   const image = images.child(elementImage.url)
+              //   await image.getDownloadURL().then((url) => {
+              //     movieItem.banner = url
+              //   })
+              // }
             }
             if (element.movie_categories.length > 0) {
               const listCategories = []
@@ -2514,10 +2645,12 @@ export default {
               user {
                 id
                 username
+                image_user
               }
               user_reply {
                 id
                 username
+                image_user
               }
               movie_id
               movie{
@@ -2574,6 +2707,9 @@ export default {
               itemPush.comment = element.comment
               itemPush.isCommentUser = false
               itemPush.isLikeByUser = false
+              itemPush.image_user = element.image_user
+                ? element.image_user
+                : require('~/static/icon.png')
               if (this.isLogin && this.isLogin === element.user_id) {
                 itemPush.isCommentUser = true
                 itemPush.color = 'error'
@@ -2819,7 +2955,7 @@ export default {
       }
     },
     editComment(item) {
-      this.commentItemEdited = item
+      this.commentItemEdited = structuredClone(item)
       this.dialogEditComment = true
       this.editedIndex = this.commentMovies.indexOf(item)
     },
@@ -3012,20 +3148,191 @@ export default {
     },
     toLinkSearch(type, item) {
       if (type === 'country') {
-        this.$router.push({ path: '/search', query: {} })
+        this.$router.push({ path: '/search', query: { country: item.code } })
       }
       if (type === 'category') {
         this.$router.push({ path: '/search', query: { category: item.code } })
       }
       if (type === 'actor') {
-        this.$router.push({ path: '/search', query: { actor: item.code } })
+        this.$router.push({ path: `/actors`, query: { code: item.code } })
       }
     },
-    toLinkWatch(item) {
-      this.$router.push({
-        path: `/movies/${this.movieE}/play`,
-        query: { ep: item.episode },
+    async toLinkWatch(item) {
+      console.log(this.$router.currentRoute)
+      if (
+        this.$router.currentRoute.query.ep &&
+        Number(this.$router.currentRoute.query.ep) === item.episode
+      ) {
+        this.snackbar = true
+        this.textSnackbar = 'Bạn đang xem tập này'
+        return
+      }
+      const currentRoute = this.$router.currentRoute
+      const updatedQuery = { code: this.movie.code, ep: item.episode }
+
+      await this.$router.replace({
+        path: currentRoute.path,
+        query: updatedQuery,
       })
+      window.location.reload()
+    },
+    async loginUser() {
+      if (this.signInItem.email === '') {
+        this.$toast.error('Vui lòng nhập email', {
+          duration: 2000,
+          position: 'top-center',
+        })
+        return
+      }
+      if (this.signInItem.password === '') {
+        this.$toast.error('Vui lòng nhập mật khẩu', {
+          duration: 2000,
+          position: 'top-center',
+        })
+        return
+      }
+
+      // eslint-disable-next-line camelcase
+      const data_login = {
+        email: this.signInItem.email,
+        password: this.signInItem.password,
+      }
+      await axios
+        .post(
+          `${process.env.URL_SERVER}/account/login-user`,
+          // eslint-disable-next-line camelcase
+          { data_login },
+          {
+            // eslint-disable-next-line camelcase
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+          }
+        )
+        .then((response) => {
+          if (response && response.data) {
+            if (response.data.status) {
+              // cookie.set('jwt-login', response.data.data.token, 1)
+              this.dialogSignIn = false
+              this.$toast.success('Đăng nhập thành công', {
+                duration: 2000,
+                position: 'top-center',
+              })
+              localStorage.setItem('user_id', response.data.data.id)
+              setTimeout(() => {
+                window.location.href = `${process.env.URL_CLIENT}/user/buy_point`
+              }, 2000)
+            } else {
+              this.$toast.error(`${response.data.message}`, {
+                duration: 2000,
+                position: 'top-center',
+              })
+              this.isLogin = false
+            }
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+          this.$toast.error('Có lỗi xảy trong quá trình đăng nhập', {
+            duration: 2000,
+            position: 'top-center',
+          })
+          this.isLogin = false
+        })
+    },
+    async registerUser() {
+      if (this.signUpItem.username === '') {
+        this.$toast.error('Vui lòng nhập tên người dùng', {
+          duration: 2000,
+          position: 'top-center',
+        })
+        return
+      }
+      if (this.signUpItem.email === '') {
+        this.$toast.error('Vui lòng nhập email', {
+          duration: 2000,
+          position: 'top-center',
+        })
+        return
+      }
+      if (this.signUpItem.password === '') {
+        this.$toast.error('Vui lòng nhập mật khẩu', {
+          duration: 2000,
+          position: 'top-center',
+        })
+        return
+      }
+      if (this.signUpItem.verify === '') {
+        this.$toast.error('Vui lòng nhập xác nhận mật khẩu', {
+          duration: 2000,
+          position: 'top-center',
+        })
+        return
+      }
+      if (
+        this.signUpItem.password !== '' &&
+        this.signUpItem.verify !== '' &&
+        this.signUpItem.password !== this.signUpItem.verify
+      ) {
+        this.$toast.error('Mật khẩu và xác nhận mật khẩu không trùng khớp', {
+          duration: 2000,
+          position: 'top-center',
+        })
+        return
+      }
+      // eslint-disable-next-line camelcase
+      const data_insert = {
+        username: this.signUpItem.username,
+        email: this.signUpItem.email,
+        password: this.signUpItem.password,
+      }
+      await axios
+        .post(`${process.env.URL_SERVER}/api/insert-user`, {
+          // eslint-disable-next-line camelcase
+          data_insert,
+        })
+        .then((response) => {
+          if (response && response.data) {
+            if (response.data.status) {
+              this.dialogSignIn = false
+              this.$toast.success('Đăng ký thành công', {
+                duration: 2000,
+                position: 'top-center',
+              })
+              this.tabSignIn = 0
+            } else {
+              this.$toast.error(`${response.data.message}`, {
+                duration: 2000,
+                position: 'top-center',
+              })
+              this.isLogin = false
+            }
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+          this.$toast.error('Có lỗi xảy trong quá trình đăng ký', {
+            duration: 2000,
+            position: 'top-center',
+          })
+          this.isLogin = false
+        })
+    },
+    openDialogSignIn() {
+      this.dialogSignIn = true
+      this.$refs.formLogin.resetValidation()
+      this.$refs.formRegister.resetValidation()
+    },
+    loginUserWithGoogle() {
+      window.location.href = `${process.env.URL_SERVER}/auth/google`
+    },
+    activeVIP() {
+      if (!this.isLogin || !this.userInfo) {
+        this.openDialogSignIn()
+      } else {
+        this.$router.push('/user/buy_point')
+      }
     },
   },
   beforeDestroy() {
@@ -3090,117 +3397,7 @@ export default {
       }
     })
   },
-  apollo: {
-    getData: {
-      query() {
-        const query = gql(`query MyQuery {
-           
-            movies_recommended: movies(where: { movie_status: {_eq: "recommended"} }){
-              id
-              code
-              name
-              name_en
-              movie_status
-              movie_type
-              content
-              time
-              view
-              year_of_manufacture
-              total_episode
-              country_id
-              country {
-                id
-                code
-                name
-              }
-              movie_images {
-                id
-                type_image
-                url
-              }
-              movie_categories(where: {is_delete: {_eq: false}}){
-                id
-                movie_id
-                category_id
-                category {
-                  id
-                  code
-                  name
-                }
-              }
-              movie_actors(where: {is_delete: {_eq: false}}){
-                id
-                movie_id
-                actor_id
-                actor {
-                  id
-                  code
-                  name
-                }
-              }
-              movie_details(where: {is_delete: {_eq: false}}){
-                id
-                movie_id
-                episode
-                url_movie
-                url_sub_en
-                url_sub_vi
-              }
-            }
-          }`)
-        return query
-      },
-      update: (data) => {},
-      async result({ data }) {
-        this.hotMoviesItems = []
-        if (data && data.movies_recommended.length > 0) {
-          for (let index = 0; index < data.movies_recommended.length; index++) {
-            const element = data.movies_recommended[index]
-            const movieItem = {}
-            movieItem.id = element.id
-            movieItem.ep = element.total_episode
-            movieItem.type = element.movie_type
-            movieItem.status = element.movie_status
-            movieItem.view = element.view
-            movieItem.title = element.name_en.toUpperCase()
-            movieItem.subtitle = element.name
-            movieItem.link = '/movies/' + element.code
-            movieItem.country = element.country.name
-            movieItem.year_of_manufacture = element.year_of_manufacture
-            movieItem.time = element.time
-            for (
-              let indexI = 0;
-              indexI < element.movie_images.length;
-              indexI++
-            ) {
-              const elementImage = element.movie_images[indexI]
-              if (elementImage.type_image === 'image' && elementImage.url) {
-                const images = this.$fire.storage.ref().child('movies/images/')
-                const image = images.child(elementImage.url)
-                await image.getDownloadURL().then((url) => {
-                  movieItem.image = url
-                })
-              }
-              if (elementImage.type_image === 'banner' && elementImage.url) {
-                const images = this.$fire.storage.ref().child('movies/banners/')
-                const image = images.child(elementImage.url)
-                await image.getDownloadURL().then((url) => {
-                  movieItem.banner = url
-                })
-              }
-            }
-            if (element.movie_categories.length > 0) {
-              movieItem.movie_categories = element.movie_categories
-            }
-            if (element.movie_actors.length > 0) {
-              movieItem.movie_actors = element.movie_actors
-            }
-            this.hotMoviesItems.push(movieItem)
-          }
-        }
-      },
-    },
-  },
+  apollo: {},
 }
 </script>
 <style scoped>
@@ -3274,6 +3471,15 @@ video {
   max-height: 50px;
   justify-content: center;
   margin-bottom: 0px;
+}
+.overlay-movie {
+  background-color: rgba(0, 0, 0, 0.8);
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  /* margin-bottom: 0px; */
 }
 .highlighted {
   font-weight: bold;

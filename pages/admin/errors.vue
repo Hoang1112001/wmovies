@@ -80,7 +80,7 @@
                 fab
                 color="error"
                 class="ml-2 mt-n7"
-                @click="loadDataFeedbacks"
+                @click="loadDataErrors"
               >
                 <v-icon>mdi-magnify</v-icon>
               </v-btn>
@@ -88,7 +88,7 @@
           </template>
 
           <template #no-data>
-            <v-btn color="error" @click="loadDataFeedbacks"> Làm mới </v-btn>
+            <v-btn color="error" @click="loadDataErrors"> Làm mới </v-btn>
           </template>
         </v-data-table>
       </v-card-text>
@@ -97,8 +97,7 @@
 </template>
 <script>
 import moment from 'moment'
-
-// import axios from 'axios'
+import axios from 'axios'
 // import gql from 'graphql-tag'
 // import moment from 'moment'
 export default {
@@ -135,6 +134,11 @@ export default {
           class: 'error font-weight-medium text-h6 white--text',
         },
         {
+          text: 'Người báo lỗi',
+          value: 'user.username',
+          class: 'error font-weight-medium text-h6 white--text',
+        },
+        {
           text: 'Chi tiết',
           value: 'note',
           class: 'error font-weight-medium text-h6 white--text',
@@ -145,20 +149,7 @@ export default {
           class: 'error font-weight-medium text-h6 white--text',
         },
       ],
-      errors: [
-        {
-          stt: 1,
-          id: null,
-          movie: {
-            id: null,
-            name: 'Friends Season 1',
-          },
-          is_error_subtitle: true,
-          is_error_movie: false,
-          note: 'Sub nhanh hơn phim',
-          created_at_string: moment().format('DD-MM-YYYY HH:mm:ss'),
-        },
-      ],
+      errors: [],
       user: {
         id: null,
         username: null,
@@ -167,7 +158,11 @@ export default {
       },
     }
   },
-  mounted() {},
+  mounted() {
+    const date = moment().format('YYYY-MM-DD')
+    this.dateQueryErrors = [date, date]
+    this.loadDataErrors()
+  },
   watch: {},
   methods: {
     getDisplayRange(date) {
@@ -181,7 +176,37 @@ export default {
       }
       return temp
     },
-    loadDataFeedbacks() {},
+    async loadDataErrors() {
+      let date1 = null
+      let date2 = null
+      if (this.dateQueryErrors[0] > this.dateQueryErrors[1]) {
+        const temp = this.dateQueryErrors
+        this.dateQueryErrors = [temp[1], temp[0]]
+      }
+      date1 = this.dateQueryErrors[0]
+      if (this.dateQueryErrors.length === 1) {
+        this.dateQueryErrors.push(this.dateQueryErrors[0])
+      }
+
+      date2 = this.dateQueryErrors[1]
+      const response = await axios.get(
+        `${process.env.URL_SERVER}/api/get-errors/${date1}/${date2}`
+      )
+      if (response.data && response.data.error_logs) {
+        const temp = []
+        for (let index = 0; index < response.data.error_logs.length; index++) {
+          const element = response.data.error_logs[index]
+          element.stt = index + 1
+          element.created_at_string = moment(element.created_at).format(
+            'DD-MM-YYYY HH:mm:ss'
+          )
+          temp.push(element)
+        }
+        this.errors = temp
+      } else {
+        this.errors = []
+      }
+    },
     searchAll() {},
   },
   apollo: {},

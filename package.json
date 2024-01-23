@@ -31,6 +31,7 @@
     "nuxt": "^2.15.8",
     "subtitles-parser-vtt": "^0.1.0",
     "vue": "^2.7.10",
+    "vue-paypal-checkout": "^3.2.0",
     "vue-server-renderer": "^2.7.10",
     "vue-template-compiler": "^2.7.10",
     "vuetify": "^2.6.10"

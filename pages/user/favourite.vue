@@ -3,6 +3,15 @@
 <!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <template>
   <v-app>
+    <v-snackbar v-model="snackbar">
+      {{ textSnackbar }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">
+          ĐÓNG
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-card elevation="24" width="95%" style="margin: 10px auto" class="white">
       <v-row>
         <v-col cols="12" sm="12" lg="12" xl="12" md="12">
@@ -72,6 +81,14 @@
                               <div class="overlay">
                                 <v-btn fab large :to="file.link">
                                   <v-icon>mdi-play</v-icon></v-btn
+                                >
+                                <v-btn
+                                  fab
+                                  large
+                                  class="ml-2"
+                                  @click="unlikeMovie(file)"
+                                >
+                                  <v-icon>mdi-close</v-icon></v-btn
                                 >
                               </div>
                             </div>
@@ -234,7 +251,9 @@
                     </v-col>
                     <v-col cols="12" sm="12" lg="12" xl="12" md="12">
                       <v-pagination
-                        v-show="favouriteMovies.length > 0"
+                        v-show="
+                          favouriteMovies.length > 0 && lengthPanigation > 1
+                        "
                         v-model="pageMovie"
                         :length="lengthPanigation"
                         :total-visible="7"
@@ -253,7 +272,7 @@
 </template>
 
 <script>
-// import gql from 'graphql-tag'
+import gql from 'graphql-tag'
 // import moment from 'moment'
 import axios from 'axios'
 import UserNav from '~/components/UserNav.vue'
@@ -264,6 +283,9 @@ export default {
   },
   data() {
     return {
+      snackbar: false,
+      textSnackbar: '',
+      userInfo: null,
       pageMovie: 1,
       lengthPanigation: 0,
       limit: 8,
@@ -275,19 +297,26 @@ export default {
   },
   watch: {
     pageMovie() {
-      console.log(this.pageMovie)
       this.offset = (this.pageMovie - 1) * this.limit
       this.loadMovieHistory()
     },
   },
   mounted() {
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
+      this.loadMovieHistory()
+    } else {
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+          this.loadMovieHistory()
+        } else {
+          this.$router.push('/')
+        }
+      })
     }
-    this.loadMovieHistory()
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
   },
 
   methods: {
@@ -320,7 +349,7 @@ export default {
                   movieItem.view = element.view
                   movieItem.title = element.name_en.toUpperCase()
                   movieItem.subtitle = element.name
-                  movieItem.link = '/movies/' + element.code
+                  movieItem.link = '/movies/movie_detail?code=' + element.code
                   movieItem.country = element.country
                   movieItem.year_of_manufacture = element.year_of_manufacture
                   movieItem.time = element.time
@@ -395,8 +424,37 @@ export default {
         })
       }
       if (type === 'actor') {
-        this.$router.push({ path: `/actors/${item.actor.code}` })
+        this.$router.push({ path: `/actors`, query: { code: item.actor.code } })
       }
+    },
+    unlikeMovie(item) {
+      const updateGraphl = gql` mutation MyMutation {
+            update_movie_favourite(
+              where: { user_id: {_eq: "${this.isLogin}" }, movie_id: {_eq: ${item.id}} }
+              _set: {
+                is_delete: true
+              }
+            ) {
+              affected_rows
+            }
+          }`
+      this.$apollo.mutate({
+        mutation: updateGraphl,
+        variables: {},
+        // eslint-disable-next-line camelcase
+        update: (store, { data: { update_movie_favourite } }) => {
+          // eslint-disable-next-line camelcase
+          if (update_movie_favourite.affected_rows) {
+            this.textSnackbar = 'Bỏ yêu thích phim thành công'
+            this.snackbar = true
+            this.isLikeMovie = false
+            this.loadMovieHistory()
+          } else {
+            this.textSnackbar = 'Bỏ yêu thích phim thất bại'
+            this.snackbar = true
+          }
+        },
+      })
     },
   },
 }

@@ -284,24 +284,34 @@ export default {
   },
   async mounted() {
     try {
-      const requestGetUser = await fetch(
+      // const requestGetUser = await fetch(
+      //   `${process.env.URL_SERVER}/account/get-admin`,
+      //   {
+      //     method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      //     mode: 'cors', // no-cors, *cors, same-origin
+      //     headers: {
+      //       'Access-Control-Allow-Origin': '*',
+      //       'Access-Control-Allow-Credentials': true,
+      //       'Content-Type': 'application/json',
+      //     },
+      //     credentials: 'include',
+      //   }
+      // )
+      // const response = await requestGetUser.json()
+      const response = await axios.get(
         `${process.env.URL_SERVER}/account/get-admin`,
         {
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-          mode: 'cors', // no-cors, *cors, same-origin
           headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
+            // 'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': 'true',
             'Content-Type': 'application/json',
           },
-          credentials: 'include',
+          withCredentials: true,
         }
       )
-      const response = await requestGetUser.json()
-
-      if (response.status) {
+      if (response.data.status) {
         this.$router.push('/admin/dashboard')
-        const dataUser = response.data
+        const dataUser = response.data.data
         this.admin = {
           id: dataUser.id,
           username: dataUser.username,

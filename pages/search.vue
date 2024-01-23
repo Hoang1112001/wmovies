@@ -509,6 +509,7 @@ export default {
   layout: 'default',
   data() {
     return {
+      userInfo: null,
       loadingText: 'Đang cập nhật dữ liệu, bạn chờ tí nhé ...',
       snackbar: false,
       textSnackbar: '',
@@ -526,64 +527,7 @@ export default {
       isLoading: false,
       textSearchMovie: '',
       selectedSearchMovie: null,
-      searchMovieItems: [
-        {
-          action: '',
-          image: require('~/static/friend-1.jpg'),
-          subtitle: 'Những người bạn mùa 1',
-          title: 'FRIENDS SEASON 1',
-          link: '/movies/friend-season-1',
-        },
-        {
-          action: '',
-          image: require('~/static/friend-2.jpg'),
-          subtitle: 'Những người bạn mùa 2',
-          title: 'FRIENDS SEASON 2',
-          link: '/movies/friend-season-2',
-        },
-        {
-          action: '',
-          image: require('~/static/friend-3.jpg'),
-          subtitle: 'Những người bạn mùa 3',
-          title: 'FRIENDS SEASON 3',
-          link: '/movies/friend-season-3',
-        },
-        {
-          action: '',
-          image: require('~/static/friend-4.jpg'),
-          subtitle: 'Những người bạn mùa 4',
-          title: 'FRIENDS SEASON 4',
-          link: '/movies/friend-season-4',
-        },
-        {
-          action: '',
-          image: require('~/static/friend-5.jpg'),
-          subtitle: 'Những người bạn mùa 5',
-          title: 'FRIENDS SEASON 5',
-          link: '/movies/friend-season-5',
-        },
-        {
-          action: '',
-          image: require('~/static/friend-6.jpg'),
-          subtitle: 'Những người bạn mùa 6',
-          title: 'FRIENDS SEASON 6',
-          link: '/movies/friend-season-6',
-        },
-        {
-          action: '',
-          image: require('~/static/friend-7.jpg'),
-          subtitle: 'Những người bạn mùa 7',
-          title: 'FRIENDS SEASON 7',
-          link: '/movies/friend-season-7',
-        },
-        {
-          action: '',
-          image: require('~/static/friend-8.jpg'),
-          subtitle: 'Những người bạn mùa 8',
-          title: 'FRIENDS SEASON 8',
-          link: '/movies/friend-season-8',
-        },
-      ],
+      searchMovieItems: [],
       categoryMovieLists: [],
       countryMovieLists: [],
       typeMovieLists: [
@@ -694,7 +638,7 @@ export default {
                 movieItem.view = element.view
                 movieItem.title = element.name_en.toUpperCase()
                 movieItem.subtitle = element.name
-                movieItem.link = '/movies/' + element.code
+                movieItem.link = '/movies/movie_detail?code=' + element.code
                 for (
                   let indexI = 0;
                   indexI < element.movie_images.length;
@@ -856,7 +800,7 @@ export default {
               movieItem.view = element.view
               movieItem.title = element.name_en.toUpperCase()
               movieItem.subtitle = element.name
-              movieItem.link = '/movies/' + element.code
+              movieItem.link = '/movies/movie_detail?code=' + element.code
               movieItem.country = element.country
               movieItem.year_of_manufacture = element.year_of_manufacture
               movieItem.time = element.time
@@ -924,7 +868,7 @@ export default {
         this.searchMovies()
       }
       if (type === 'actor') {
-        this.$router.push({ path: `/actors/${item.actor.code}` })
+        this.$router.push({ path: `/actors`, query: { code: item.actor.code } })
       }
     },
     linkToMovieDetail(item) {
@@ -932,127 +876,14 @@ export default {
         path: `/movies/${item.title}`,
       })
     },
+    toLink(item) {
+      this.$router.push({
+        path: '/movies/movie_detail',
+        query: { code: item.code },
+      })
+    },
   },
-  apollo: {
-    // getData: {
-    //   query() {
-    //     const query = gql(`query MyQuery {
-    //         categories(where: {is_delete: {_eq: false}}) {
-    //           id
-    //           code
-    //           name
-    //         }
-    //         countries(where: {is_delete: {_eq: false}}) {
-    //           id
-    //           code
-    //           name
-    //         }
-    //       }
-    //        `)
-    //     return query
-    //   },
-    //   update: (data) => {},
-    //   result({ data }) {
-    //     this.categoryMovieLists = []
-    //     this.countryMovieLists = []
-    //     this.categoryMovieLists = data.categories
-    //     this.countryMovieLists = data.countries
-    //     // this.newMoviesItems = []
-    //     // this.itemMovieLists = []
-    //     // if (data && data.movies_latest.length > 0) {
-    //     //   for (let index = 0; index < data.movies_latest.length; index++) {
-    //     //     const element = data.movies_latest[index]
-    //     //     const movieItem = {}
-    //     //     movieItem.id = element.id
-    //     //     movieItem.ep = element.total_episode
-    //     //     movieItem.type = element.movie_type
-    //     //     movieItem.status = element.movie_status
-    //     //     movieItem.view = element.view
-    //     //     movieItem.title = element.name_en.toUpperCase()
-    //     //     movieItem.subtitle = element.name
-    //     //     movieItem.link = '/movies/' + element.code
-    //     //     movieItem.country = element.country.name
-    //     //     movieItem.year_of_manufacture = element.year_of_manufacture
-    //     //     movieItem.time = element.time
-    //     //     for (
-    //     //       let indexI = 0;
-    //     //       indexI < element.movie_images.length;
-    //     //       indexI++
-    //     //     ) {
-    //     //       const elementImage = element.movie_images[indexI]
-    //     //       console.log(elementImage)
-    //     //       if (elementImage.type_image === 'image' && elementImage.url) {
-    //     //         const images = this.$fire.storage.ref().child('movies/images/')
-    //     //         const image = images.child(elementImage.url)
-    //     //         await image.getDownloadURL().then((url) => {
-    //     //           movieItem.image = url
-    //     //         })
-    //     //       }
-    //     //       if (elementImage.type_image === 'banner' && elementImage.url) {
-    //     //         const images = this.$fire.storage.ref().child('movies/banners/')
-    //     //         const image = images.child(elementImage.url)
-    //     //         await image.getDownloadURL().then((url) => {
-    //     //           movieItem.banner = url
-    //     //         })
-    //     //       }
-    //     //     }
-    //     //     if (element.movie_categories.length > 0) {
-    //     //       movieItem.movie_categories = element.movie_categories
-    //     //     }
-    //     //     if (element.movie_actors.length > 0) {
-    //     //       movieItem.movie_actors = element.movie_actors
-    //     //     }
-    //     //     this.newMoviesItems.push(movieItem)
-    //     //   }
-    //     // }
-    //     // if (data && data.movies_recommended.length > 0) {
-    //     //   for (let index = 0; index < data.movies_recommended.length; index++) {
-    //     //     const element = data.movies_recommended[index]
-    //     //     const movieItem = {}
-    //     //     movieItem.id = element.id
-    //     //     movieItem.ep = element.total_episode
-    //     //     movieItem.type = element.movie_type
-    //     //     movieItem.status = element.movie_status
-    //     //     movieItem.view = element.view
-    //     //     movieItem.title = element.name_en.toUpperCase()
-    //     //     movieItem.subtitle = element.name
-    //     //     movieItem.link = '/movies/' + element.code
-    //     //     movieItem.country = element.country.name
-    //     //     movieItem.year_of_manufacture = element.year_of_manufacture
-    //     //     movieItem.time = element.time
-    //     //     for (
-    //     //       let indexI = 0;
-    //     //       indexI < element.movie_images.length;
-    //     //       indexI++
-    //     //     ) {
-    //     //       const elementImage = element.movie_images[indexI]
-    //     //       if (elementImage.type_image === 'image' && elementImage.url) {
-    //     //         const images = this.$fire.storage.ref().child('movies/images/')
-    //     //         const image = images.child(elementImage.url)
-    //     //         await image.getDownloadURL().then((url) => {
-    //     //           movieItem.image = url
-    //     //         })
-    //     //       }
-    //     //       if (elementImage.type_image === 'banner' && elementImage.url) {
-    //     //         const images = this.$fire.storage.ref().child('movies/banners/')
-    //     //         const image = images.child(elementImage.url)
-    //     //         await image.getDownloadURL().then((url) => {
-    //     //           movieItem.banner = url
-    //     //         })
-    //     //       }
-    //     //     }
-    //     //     if (element.movie_categories.length > 0) {
-    //     //       movieItem.movie_categories = element.movie_categories
-    //     //     }
-    //     //     if (element.movie_actors.length > 0) {
-    //     //       movieItem.movie_actors = element.movie_actors
-    //     //     }
-    //     //     this.itemMovieLists.push(movieItem)
-    //     //   }
-    //     // }
-    //   },
-    // },
-  },
+  apollo: {},
 }
 </script>
 <style scoped>

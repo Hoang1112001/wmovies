@@ -9,31 +9,31 @@ export default {
   router: {
     routes: [],
     extendRoutes(routes, resolve) {
-      routes.push({
-        name: 'movie-detail',
-        path: '/movies/:slug',
-        component: resolve(__dirname, 'pages/movies/movie_detail/index.vue'),
-      })
-      routes.push({
-        name: 'movie-detail-play',
-        path: '/movies/:slug/play',
-        component: resolve(__dirname, 'pages/movies/movie_detail/play.vue'),
-      })
-      routes.push({
-        name: 'movie-couplet',
-        path: '/movies/couplet/:slug',
-        component: resolve(__dirname, 'pages/movies/couplet/index.vue'),
-      })
-      routes.push({
-        name: 'movie-word',
-        path: '/movies/word/:slug',
-        component: resolve(__dirname, 'pages/movies/word/index.vue'),
-      })
-      routes.push({
-        name: 'actor',
-        path: '/actors/:slug',
-        component: resolve(__dirname, 'pages/actors/index.vue'),
-      })
+      // routes.push({
+      //   name: 'movie-detail',
+      //   path: '/movies/:slug',
+      //   component: resolve(__dirname, 'pages/movies/movie_detail/index.vue'),
+      // })
+      // routes.push({
+      //   name: 'movie-detail-play',
+      //   path: '/movies/:slug/play',
+      //   component: resolve(__dirname, 'pages/movies/movie_detail/play.vue'),
+      // })
+      // routes.push({
+      //   name: 'movie-couplet',
+      //   path: '/movies/couplet/:slug',
+      //   component: resolve(__dirname, 'pages/movies/couplet/index.vue'),
+      // })
+      // routes.push({
+      //   name: 'movie-word',
+      //   path: '/movies/word/:slug',
+      //   component: resolve(__dirname, 'pages/movies/word/index.vue'),
+      // })
+      // routes.push({
+      //   name: 'actor',
+      //   path: '/actors/:slug',
+      //   component: resolve(__dirname, 'pages/actors/index.vue'),
+      // })
     },
   },
   generate: {
@@ -56,7 +56,7 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  // plugins: [{ src: '~/plugins/paypal.js', ssr: false }],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,

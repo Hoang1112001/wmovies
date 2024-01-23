@@ -103,13 +103,14 @@
           </v-card-text>
         </v-col>
         <v-col>
-          <v-img
+          <!-- <v-img
             style="margin: 30px auto"
             max-width="500"
             max-height="500"
             :src="require('~/static/luyen-noi.jpg')"
           ></v-img
-        ></v-col>
+        > -->
+        </v-col>
       </v-row>
 
       <v-divider class="d-flex mx-auto"></v-divider>
@@ -122,13 +123,14 @@
         class="d-flex mx-auto mt-2"
       >
         <v-col>
-          <v-img
+          <!-- <v-img
             style="margin: 30px auto"
             max-width="500"
             max-height="500"
             :src="require('~/static/luyen-nghe.jpg')"
           ></v-img
-        ></v-col>
+        > -->
+        </v-col>
         <v-col>
           <v-card-text class="d-flex">
             <v-avatar class="mt-n3" color="orange" size="50"
@@ -286,13 +288,13 @@
           </v-card-text>
         </v-col>
         <v-col>
-          <v-img
+          <!-- <v-img
             style="margin: 30px auto"
             max-width="500"
             max-height="500"
             :src="require('~/static/hoc-tu-vung.png')"
-          ></v-img
-        ></v-col>
+          ></v-img> -->
+        </v-col>
       </v-row>
     </v-card>
   </v-app>
@@ -304,6 +306,7 @@ AOS.init()
 export default {
   data() {
     return {
+      userInfo: null,
       collapseOnScroll: true,
       clipped: false,
       drawer: false,

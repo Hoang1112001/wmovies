@@ -3,6 +3,15 @@
 <!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <template>
   <v-app>
+    <v-snackbar v-model="snackbar">
+      {{ textSnackbar }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">
+          ĐÓNG
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-card elevation="24" width="95%" style="margin: 10px auto" class="white">
       <v-row>
         <v-col cols="12" sm="12" lg="12" xl="12" md="12">
@@ -56,7 +65,9 @@
                               {{ 'Được lưu từ phim: ' }}
                               <nuxt-link
                                 class="linkMovie"
-                                :to="'/movies/' + item.movie.code"
+                                :to="
+                                  '/movies/movie_detail?code=' + item.movie.code
+                                "
                               >
                                 {{
                                   item.movie.name_en.toUpperCase()
@@ -76,7 +87,7 @@
                               >
                                 Nghe
                               </v-btn>
-                              <v-btn
+                              <!-- <v-btn
                                 color="black"
                                 class="ml-2 mt-n3"
                                 height="40px"
@@ -86,7 +97,7 @@
                                 width="40px"
                               >
                                 Nói
-                              </v-btn>
+                              </v-btn> -->
                               <v-btn
                                 color="black"
                                 class="ml-2 mt-n3"
@@ -95,6 +106,7 @@
                                 rounded
                                 outlined
                                 width="40px"
+                                @click="deleteCouplet(item)"
                               >
                                 Xóa
                               </v-btn>
@@ -105,7 +117,7 @@
                     </v-col>
                     <v-col cols="12" sm="12" lg="12" xl="12" md="12">
                       <v-pagination
-                        v-show="couplets.length > 0"
+                        v-show="couplets.length > 0 && lengthPanigation > 1"
                         v-model="pageCouplet"
                         :length="lengthPanigation"
                         :total-visible="7"
@@ -124,6 +136,7 @@
 </template>
 
 <script>
+import gql from 'graphql-tag'
 import axios from 'axios'
 import UserNav from '~/components/UserNav.vue'
 export default {
@@ -132,6 +145,9 @@ export default {
   },
   data() {
     return {
+      snackbar: false,
+      textSnackbar: '',
+      userInfo: null,
       pageCouplet: 1,
       lengthPanigation: 0,
       limit: 4,
@@ -145,13 +161,21 @@ export default {
   },
 
   mounted() {
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
+      this.loadMovieCouplets()
+    } else {
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+          this.loadMovieCouplets()
+        } else {
+          this.$router.push('/')
+        }
+      })
     }
-    this.loadMovieCouplets()
   },
   watch: {
     pageCouplet() {
@@ -161,6 +185,32 @@ export default {
     },
   },
   methods: {
+    deleteCouplet(item) {
+      const updateGraphl = gql` mutation MyMutation {
+            delete_movie_couplets(
+              where: { id: { _eq: "${item.id}" } }
+            ) {
+              affected_rows
+            }
+          }`
+      this.$apollo.mutate({
+        mutation: updateGraphl,
+        variables: {},
+        // eslint-disable-next-line camelcase
+        update: (store, { data: { delete_movie_couplets } }) => {
+          // eslint-disable-next-line camelcase
+          if (delete_movie_couplets.affected_rows) {
+            this.textSnackbar = 'Xóa cặp câu thành công'
+            this.snackbar = true
+            this.loadMovieCouplets()
+          } else {
+            this.loadMovieCouplets()
+            this.textSnackbar = 'Xóa cặp câu thất bại'
+            this.snackbar = true
+          }
+        },
+      })
+    },
     speakWordLookup(couplet) {
       if ('speechSynthesis' in window) {
         // Tạo một instance của SpeechSynthesisUtterance
@@ -236,7 +286,7 @@ export default {
   color: black;
 }
 .linkMovie:hover {
-  color: orange;
+  color: red;
   text-decoration: underline;
 }
 </style>

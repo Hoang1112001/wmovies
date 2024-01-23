@@ -285,12 +285,10 @@
 import axios from 'axios'
 
 export default {
-  asyncData({ params }) {
-    // Lấy dữ liệu chi tiết về phim từ API hoặc nguồn dữ liệu khác bằng slug name
-    const slug = params.slug
-    console.log(slug)
+  asyncData({ params, route }) {
+    const slug = route.query.code
 
-    const actorE = slug // Hàm fetch phim theo slug name
+    const actorE = slug
 
     return { actorE }
   },
@@ -314,7 +312,6 @@ export default {
   },
   watch: {
     pageMovie() {
-      console.log(this.pageMovie)
       this.offset = (this.pageMovie - 1) * this.limit
       this.loadDataActor()
     },
@@ -324,9 +321,6 @@ export default {
       this.isLogin = localStorage.getItem('user_id')
     }
     this.loadDataActor()
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
   },
 
   methods: {
@@ -368,7 +362,7 @@ export default {
                 movieItem.view = element.view
                 movieItem.title = element.name_en.toUpperCase()
                 movieItem.subtitle = element.name
-                movieItem.link = '/movies/' + element.code
+                movieItem.link = '/movies/movie_detail?code=' + element.code
                 movieItem.country = element.country
                 movieItem.year_of_manufacture = element.year_of_manufacture
                 movieItem.time = element.time
@@ -437,7 +431,7 @@ export default {
         })
       }
       if (type === 'actor') {
-        this.$router.push({ path: `/actors/${item.actor.code}` })
+        this.$router.push({ path: `/actors`, query: { code: item.actor.code } })
       }
     },
   },

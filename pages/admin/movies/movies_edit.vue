@@ -1451,6 +1451,7 @@ export default {
               const element = this.movie_categories[index]
               const tempCategoryInsert = {}
               tempCategoryInsert.category_id = element.id
+              tempCategoryInsert.is_delete = false
               movieCategories.push(tempCategoryInsert)
               // tempCategoryInsert.created_by =
             }
@@ -1458,6 +1459,7 @@ export default {
               const element = this.movie_actors[index]
               const tempActorInsert = {}
               tempActorInsert.actor_id = element.id
+              tempActorInsert.is_delete = false
               movieActors.push(tempActorInsert)
               // tempActorInsert.created_by =
             }
@@ -1593,6 +1595,7 @@ export default {
           const tempCategoryInsert = {}
           tempCategoryInsert.movie_id = this.movie.id
           tempCategoryInsert.category_id = element.id
+          tempCategoryInsert.is_delete = false
           movieCategories.push(tempCategoryInsert)
           // tempCategoryInsert.created_by =
         }
@@ -1608,6 +1611,7 @@ export default {
           const tempActorInsert = {}
           tempActorInsert.movie_id = this.movie.id
           tempActorInsert.actor_id = element.id
+          tempActorInsert.is_delete = false
           movieActors.push(tempActorInsert)
           // tempActorInsert.created_by =
         }

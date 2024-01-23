@@ -3,6 +3,15 @@
 <!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <template>
   <v-app>
+    <v-snackbar v-model="snackbar">
+      {{ textSnackbar }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">
+          ĐÓNG
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-card elevation="24" width="95%" style="margin: 10px auto" class="white">
       <v-row>
         <v-col cols="12" sm="12" lg="12" xl="12" md="12">
@@ -71,7 +80,10 @@
                                 {{ 'Được lưu từ phim: ' }}
                                 <nuxt-link
                                   class="linkMovie"
-                                  :to="'/movies/' + item.movie.code"
+                                  :to="
+                                    '/movies/movie_detail?code=' +
+                                    item.movie.code
+                                  "
                                 >
                                   {{
                                     item.movie.name_en.toUpperCase()
@@ -99,9 +111,20 @@
                                 rounded
                                 outlined
                                 width="40px"
+                                @click="deleteWord(item)"
+                              >
+                                Xóa
+                              </v-btn>
+                              <!-- <v-btn
+                                class="ml-2 mt-n3"
+                                height="40px"
+                                right
+                                rounded
+                                outlined
+                                width="40px"
                               >
                                 Nói
-                              </v-btn>
+                              </v-btn> -->
                             </v-card-actions>
                           </div>
                         </div>
@@ -109,7 +132,7 @@
                     </v-col>
                     <v-col cols="12" sm="12" lg="12" xl="12" md="12">
                       <v-pagination
-                        v-show="words.length > 0"
+                        v-show="words.length > 0 && lengthPanigation > 1"
                         v-model="pageWord"
                         :length="lengthPanigation"
                         :total-visible="7"
@@ -128,6 +151,7 @@
 </template>
 
 <script>
+import gql from 'graphql-tag'
 import axios from 'axios'
 import UserNav from '~/components/UserNav.vue'
 export default {
@@ -136,6 +160,9 @@ export default {
   },
   data() {
     return {
+      snackbar: false,
+      textSnackbar: '',
+      userInfo: null,
       pageWord: 1,
       lengthPanigation: 0,
       limit: 8,
@@ -149,13 +176,21 @@ export default {
   },
 
   mounted() {
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
+      this.loadMovieWords()
+    } else {
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+          this.loadMovieWords()
+        } else {
+          this.$router.push('/')
+        }
+      })
     }
-    this.loadMovieWords()
   },
   watch: {
     pageWord() {
@@ -188,8 +223,8 @@ export default {
                   arrayCheck.push(element.id)
                   const wordItem = {}
                   wordItem.id = element.id
-                  wordItem.color =
-                    '#' + Math.floor(Math.random() * 16777215).toString(16)
+                  wordItem.color = index % 2 === 0 ? '#FF8A80' : '#FFCDD2'
+                  // '#' + Math.floor(Math.random() * 16777215).toString(16)
                   wordItem.word_id = element.word.id
                   wordItem.word = element.word.word
                   wordItem.type = element.word.type
@@ -235,6 +270,32 @@ export default {
         console.error('Trình duyệt không hỗ trợ API Web Speech.')
       }
     },
+    deleteWord(item) {
+      const updateGraphl = gql` mutation MyMutation {
+            delete_movie_words(
+              where: { id: { _eq: "${item.id}" } }
+            ) {
+              affected_rows
+            }
+          }`
+      this.$apollo.mutate({
+        mutation: updateGraphl,
+        variables: {},
+        // eslint-disable-next-line camelcase
+        update: (store, { data: { delete_movie_words } }) => {
+          // eslint-disable-next-line camelcase
+          if (delete_movie_words.affected_rows) {
+            this.textSnackbar = 'Xóa từ thành công'
+            this.snackbar = true
+            this.loadMovieWords()
+          } else {
+            this.loadMovieWords()
+            this.textSnackbar = 'Xóa từ thất bại'
+            this.snackbar = true
+          }
+        },
+      })
+    },
   },
 }
 </script>
@@ -243,7 +304,7 @@ export default {
   text-decoration: none;
 }
 .linkMovie:hover {
-  color: orange;
+  color: red;
   text-decoration: underline;
 }
 </style>

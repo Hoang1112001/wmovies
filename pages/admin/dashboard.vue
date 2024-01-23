@@ -7,7 +7,7 @@
       <v-card-text>
         <v-row>
           <v-col cols="12" sm="4" lg="4" xl="4" md="4">
-            <v-card max-width="344">
+            <v-card max-width="344" height="168">
               <v-card-text>
                 <v-list-item class="mt-3 ml-n3">
                   <v-list-item-avatar>
@@ -18,16 +18,16 @@
                     <v-list-item-title class="red--text font-weight-bold"
                       >Số lượt xem phim trong ngày:</v-list-item-title
                     ><v-list-item-subtitle class="red--text font-weight-bold"
-                      ><h2>10</h2></v-list-item-subtitle
+                      ><h2>{{ movies }}</h2></v-list-item-subtitle
                     >
                   </v-list-item-content>
                 </v-list-item>
               </v-card-text>
-              <v-card-actions>
+              <!-- <v-card-actions>
                 <v-btn disabled text color="error" @click="reveal = true">
                   Xem chi tiết
                 </v-btn>
-              </v-card-actions>
+              </v-card-actions> -->
             </v-card>
           </v-col>
 
@@ -43,7 +43,7 @@
                     <v-list-item-title class="red--text font-weight-bold"
                       >Số lượt báo lỗi phim trong ngày:</v-list-item-title
                     ><v-list-item-subtitle class="red--text font-weight-bold"
-                      ><h2>5</h2></v-list-item-subtitle
+                      ><h2>{{ errors }}</h2></v-list-item-subtitle
                     >
                   </v-list-item-content>
                 </v-list-item>
@@ -67,7 +67,7 @@
                     <v-list-item-title class="red--text font-weight-bold"
                       >Số lượt feedbacks trong ngày:</v-list-item-title
                     ><v-list-item-subtitle class="red--text font-weight-bold"
-                      ><h2>1</h2></v-list-item-subtitle
+                      ><h2>{{ feedbacks }}</h2></v-list-item-subtitle
                     >
                   </v-list-item-content>
                 </v-list-item>
@@ -82,7 +82,7 @@
         </v-row>
         <v-row>
           <v-col>
-            <!-- <v-card class="mt-4 mx-auto" max-width="1000">
+            <v-card class="mt-4 mx-auto" max-width="1000">
               <v-sheet
                 class="v-sheet--offset mx-auto"
                 color="error"
@@ -108,7 +108,7 @@
                   Cập nhật 26 giây trước</span
                 >
               </v-card-text>
-            </v-card> -->
+            </v-card>
           </v-col>
         </v-row>
       </v-card-text>
@@ -116,15 +116,17 @@
   </v-container>
 </template>
 <script>
-// import axios from 'axios'
+import axios from 'axios'
+import moment from 'moment'
 
 export default {
   layout: 'admin',
   name: 'Homepage',
   data() {
     return {
-      totalDataReceptionToday: 2,
-      totalDataPatientToday: 2,
+      errors: 0,
+      feedbacks: 0,
+      movies: 0,
       labels: [
         '13/12',
         '14/12',
@@ -138,10 +140,26 @@ export default {
       value: [200, 675, 410, 390, 310, 460, 250, 240],
     }
   },
-  mounted() {},
+  mounted() {
+    this.getTotalData()
+  },
   watch: {},
   methods: {
-    getTotalData(data) {},
+    async getTotalData() {
+      const date = moment().format('YYYY-MM-DD')
+      const response = await axios.get(
+        `${process.env.URL_SERVER}/api/get-total/${date}/${date}`
+      )
+      if (response.data && response.data.error_logs) {
+        this.feedbacks = response.data.feedbacks
+        this.errors = response.data.error_logs
+        this.movies = response.data.movies
+      } else {
+        this.feedbacks = response.data.feedbacks
+        this.errors = response.data.error_logs
+        this.movies = response.data.movies
+      }
+    },
   },
 }
 </script>

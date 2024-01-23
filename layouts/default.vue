@@ -20,7 +20,7 @@
       </v-tooltip> -->
       <HeaderMovie></HeaderMovie>
 
-      <Nuxt dark class="error" />
+      <Nuxt dark class="error" @signin="handleSignIn" />
 
       <FooterMovie></FooterMovie>
       <!-- <v-tooltip bottom>
@@ -54,27 +54,13 @@ export default {
   name: 'DefaultLayout',
   data() {
     return {
+      userInfo: null,
       collapseOnScroll: true,
       clipped: false,
       drawer: false,
       fixed: false,
       fab: false,
-      items: [
-        {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/',
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
-        },
-      ],
-      miniVariant: false,
       right: true,
-      rightDrawer: false,
-      title: 'Vuetify.js',
     }
   },
   methods: {
@@ -85,6 +71,9 @@ export default {
     },
     toTop() {
       this.$vuetify.goTo(0)
+    },
+    handleSignIn(data) {
+      console.log(data)
     },
   },
 }

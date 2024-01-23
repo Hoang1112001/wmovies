@@ -214,8 +214,9 @@
                       <template v-for="(item, index) in commentMovies">
                         <v-divider></v-divider>
                         <v-list-item>
-                          <v-list-item-avatar :color="item.color">
-                            {{ item.user.username.slice(0, 1).toUpperCase() }}
+                          <v-list-item-avatar>
+                            <v-img :src="item.image_user"></v-img>
+                            <!-- {{ item.user.username.slice(0, 1).toUpperCase() }} -->
                             <!-- <v-icon>mdi-account</v-icon> -->
                             <!-- <v-img :src="item.image"></v-img> -->
                           </v-list-item-avatar>
@@ -313,12 +314,13 @@
                             >
                               <v-divider></v-divider>
                               <v-list-item>
-                                <v-list-item-avatar :color="child.color">
-                                  {{
+                                <v-list-item-avatar>
+                                  <v-img :src="item.image_user"></v-img>
+                                  <!-- {{
                                     child.user.username
                                       .slice(0, 1)
                                       .toUpperCase()
-                                  }}
+                                  }} -->
                                 </v-list-item-avatar>
                                 <v-list-item-content>
                                   <v-list-item-title
@@ -582,46 +584,7 @@
           </v-card-text>
         </v-col>
         <v-col cols="12" sm="3" lg="3" xl="3" md="3">
-          <v-card max-width="450" class="mx-auto mt-2 mr-2">
-            <v-toolbar color="error" dark>
-              <v-row class="d-flex justify-space-between ml-2 mt-2">
-                <v-toolbar-title class="font-weight-bold"
-                  >PHIM ĐỀ XUẤT
-                </v-toolbar-title>
-                <v-img
-                  class="mt-n4"
-                  max-height="68"
-                  max-width="85"
-                  :src="require('~/static/logo.png')"
-                ></v-img>
-              </v-row>
-            </v-toolbar>
-
-            <v-list three-line>
-              <template v-for="(item, index) in listViewMovies">
-                <v-divider
-                  v-if="item.divider"
-                  :key="index"
-                  :inset="item.inset"
-                ></v-divider>
-
-                <v-list-item v-else :key="item.title" :href="item.link">
-                  <v-list-item-avatar tile>
-                    <v-img :src="item.image"></v-img>
-                  </v-list-item-avatar>
-
-                  <v-list-item-content>
-                    <v-list-item-title class="orange--text font-weight-bold">{{
-                      item.title
-                    }}</v-list-item-title>
-                    <v-list-item-subtitle class="font-italic">{{
-                      item.subtitle
-                    }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </v-list>
-          </v-card>
+          <Recommend />
         </v-col>
       </v-row>
     </v-card>
@@ -633,18 +596,22 @@
 import gql from 'graphql-tag'
 import moment from 'moment'
 import axios from 'axios'
-export default {
-  asyncData({ params }) {
-    // Lấy dữ liệu chi tiết về phim từ API hoặc nguồn dữ liệu khác bằng slug name
-    const slug = params.slug
-    console.log(slug)
+import Recommend from '~/components/Recommend.vue'
 
+export default {
+  asyncData({ params, route }) {
+    const slug = decodeURIComponent(route.query.code)
     const movieE = slug // Hàm fetch phim theo slug name
 
     return { movieE }
   },
+  components: {
+    Recommend,
+  },
   data() {
     return {
+      tempEdited: null,
+      userInfo: null,
       dialogDeleteComment: false,
       dialogEditComment: false,
       pageComments: 1,
@@ -669,129 +636,7 @@ export default {
         image: null,
         content: ``,
       },
-      listViewMovies: [
-        {
-          action: '',
-          image: require('~/static/friend-1.jpg'),
-          subtitle: 'Những người bạn mùa 1',
-          title: 'FRIENDS SEASON 1',
-          link: '/movies/friend-season-1',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-2.jpg'),
-          subtitle: 'Những người bạn mùa 2',
-          title: 'FRIENDS SEASON 2',
-          link: '/movies/friend-season-2',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-3.jpg'),
-          subtitle: 'Những người bạn mùa 3',
-          title: 'FRIENDS SEASON 3',
-          link: '/movies/friend-season-3',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-4.jpg'),
-          subtitle: 'Những người bạn mùa 4',
-          title: 'FRIENDS SEASON 4',
-          link: '/movies/friend-season-4',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-5.jpg'),
-          subtitle: 'Những người bạn mùa 5',
-          title: 'FRIENDS SEASON 5',
-          link: '/movies/friend-season-5',
-        },
-      ],
-      hotMoviesItems: [
-        {
-          ep: '24',
-          type: 'series',
-          view: 15000,
-          status: 'HOT',
-          image: require('~/static/friend-1.jpg'),
-          subtitle: 'Những người bạn mùa 1',
-          title: 'FRIENDS SEASON 1',
-          link: '/movies/friend-season-1',
-        },
-        {
-          ep: '28',
-          type: 'series',
-          view: 75412,
-          status: 'HOT',
-          image: require('~/static/friend-2.jpg'),
-          subtitle: 'Những người bạn mùa 2',
-          title: 'FRIENDS SEASON 2',
-          link: '/movies/friend-season-2',
-        },
-        {
-          ep: '30',
-          type: 'series',
-          view: 12154,
-          status: 'HOT',
-          image: require('~/static/friend-3.jpg'),
-          subtitle: 'Những người bạn mùa 3',
-          title: 'FRIENDS SEASON 3',
-          link: '/movies/friend-season-3',
-        },
-        {
-          ep: '24',
-          type: 'series',
-          view: 21200,
-          status: 'HOT',
-          image: require('~/static/friend-4.jpg'),
-          subtitle: 'Những người bạn mùa 4',
-          title: 'FRIENDS SEASON 4',
-          link: '/movies/friend-season-4',
-        },
-        {
-          ep: '19',
-          type: 'series',
-          view: 65187,
-          status: 'HOT',
-          image: require('~/static/friend-5.jpg'),
-          subtitle: 'Những người bạn mùa 5',
-          title: 'FRIENDS SEASON 5',
-          link: '/movies/friend-season-5',
-        },
-        {
-          ep: '20',
-          type: 'series',
-          view: 26510,
-          status: 'HOT',
-          image: require('~/static/friend-6.jpg'),
-          subtitle: 'Những người bạn mùa 6',
-          title: 'FRIENDS SEASON 6',
-          link: '/movies/friend-season-6',
-        },
-        {
-          ep: '26',
-          type: 'series',
-          view: 1000,
-          status: 'NEW',
-          image: require('~/static/friend-7.jpg'),
-          subtitle: 'Những người bạn mùa 7',
-          title: 'FRIENDS SEASON 7',
-          link: '/movies/friend-season-7',
-        },
-        {
-          ep: '24',
-          type: 'series',
-          view: 500,
-          status: 'NEW',
-          image: require('~/static/friend-8.jpg'),
-          subtitle: 'Những người bạn mùa 8',
-          title: 'FRIENDS SEASON 8',
-          link: '/movies/friend-season-8',
-        },
-      ],
+      hotMoviesItems: [],
       totalComments: 0,
       commentMovies: [],
       movie_favourite: null,
@@ -805,8 +650,16 @@ export default {
   },
 
   mounted() {
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
+    } else {
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+        }
+      })
     }
     this.loadDataMovie()
     this.loadComment(true)
@@ -825,7 +678,20 @@ export default {
         this.textSnackbar = 'Vui lòng đăng nhập để thực hiện chức năng'
         return
       }
-      this.$router.push(`/movies/${type}/${this.movieE}`)
+
+      if (type === 'word') {
+        this.$router.push({
+          path: `/movies/word`,
+          query: { code: this.movie.code },
+        })
+      }
+
+      if (type === 'couplet') {
+        this.$router.push({
+          path: `/movies/couplet`,
+          query: { code: this.movie.code },
+        })
+      }
     },
     loadDataMovie() {
       const queryMovie = gql(`query MyQuery {
@@ -949,13 +815,13 @@ export default {
                   movieItem.image = url
                 })
               }
-              if (elementImage.type_image === 'banner' && elementImage.url) {
-                const images = this.$fire.storage.ref().child('movies/banners/')
-                const image = images.child(elementImage.url)
-                await image.getDownloadURL().then((url) => {
-                  movieItem.banner = url
-                })
-              }
+              // if (elementImage.type_image === 'banner' && elementImage.url) {
+              //   const images = this.$fire.storage.ref().child('movies/banners/')
+              //   const image = images.child(elementImage.url)
+              //   await image.getDownloadURL().then((url) => {
+              //     movieItem.banner = url
+              //   })
+              // }
             }
             if (element.movie_categories.length > 0) {
               const listCategories = []
@@ -1009,10 +875,12 @@ export default {
               user {
                 id
                 username
+                image_user
               }
               user_reply {
                 id
                 username
+                image_user
               }
               movie_id
               movie{
@@ -1069,6 +937,9 @@ export default {
               itemPush.comment = element.comment
               itemPush.isCommentUser = false
               itemPush.isLikeByUser = false
+              itemPush.image_user = element.image_user
+                ? element.image_user
+                : require('~/static/icon.png')
               if (this.isLogin && this.isLogin === element.user_id) {
                 itemPush.isCommentUser = true
                 itemPush.color = 'error'
@@ -1314,7 +1185,7 @@ export default {
       }
     },
     editComment(item) {
-      this.commentItemEdited = item
+      this.commentItemEdited = structuredClone(item)
       this.dialogEditComment = true
       this.editedIndex = this.commentMovies.indexOf(item)
     },
@@ -1513,7 +1384,7 @@ export default {
         this.$router.push({ path: '/search', query: { category: item.code } })
       }
       if (type === 'actor') {
-        this.$router.push({ path: `/actors/${item.code}` })
+        this.$router.push({ path: `/actors`, query: { code: item.code } })
       }
     },
     toLinkWatch(item) {
@@ -1532,121 +1403,11 @@ export default {
       })
 
       this.$router.push({
-        path: `/movies/${this.movieE}/play`,
-        query: { ep: item.episode },
+        path: `/movies/movie_detail/play`,
+        query: { code: this.movie.code, ep: item.episode },
       })
     },
   },
-  apollo: {
-    getData: {
-      query() {
-        const query = gql(`query MyQuery {
-
-            movies_recommended: movies(where: { movie_status: {_eq: "recommended"} }){
-              id
-              code
-              name
-              name_en
-              movie_status
-              movie_type
-              content
-              time
-              view
-              year_of_manufacture
-              total_episode
-              country_id
-              country {
-                id
-                code
-                name
-              }
-              movie_images {
-                id
-                type_image
-                url
-              }
-              movie_categories(where: {is_delete: {_eq: false}}){
-                id
-                movie_id
-                category_id
-                category {
-                  id
-                  code
-                  name
-                }
-              }
-              movie_actors(where: {is_delete: {_eq: false}}){
-                id
-                movie_id
-                actor_id
-                actor {
-                  id
-                  code
-                  name
-                }
-              }
-              movie_details(where: {is_delete: {_eq: false}}){
-                id
-                movie_id
-                episode
-                url_movie
-                url_sub_en
-                url_sub_vi
-              }
-            }
-          }`)
-        return query
-      },
-      update: (data) => {},
-      async result({ data }) {
-        this.hotMoviesItems = []
-        if (data && data.movies_recommended.length > 0) {
-          for (let index = 0; index < data.movies_recommended.length; index++) {
-            const element = data.movies_recommended[index]
-            const movieItem = {}
-            movieItem.id = element.id
-            movieItem.ep = element.total_episode
-            movieItem.type = element.movie_type
-            movieItem.status = element.movie_status
-            movieItem.view = element.view
-            movieItem.title = element.name_en.toUpperCase()
-            movieItem.subtitle = element.name
-            movieItem.link = '/movies/' + element.code
-            movieItem.country = element.country.name
-            movieItem.year_of_manufacture = element.year_of_manufacture
-            movieItem.time = element.time
-            for (
-              let indexI = 0;
-              indexI < element.movie_images.length;
-              indexI++
-            ) {
-              const elementImage = element.movie_images[indexI]
-              if (elementImage.type_image === 'image' && elementImage.url) {
-                const images = this.$fire.storage.ref().child('movies/images/')
-                const image = images.child(elementImage.url)
-                await image.getDownloadURL().then((url) => {
-                  movieItem.image = url
-                })
-              }
-              if (elementImage.type_image === 'banner' && elementImage.url) {
-                const images = this.$fire.storage.ref().child('movies/banners/')
-                const image = images.child(elementImage.url)
-                await image.getDownloadURL().then((url) => {
-                  movieItem.banner = url
-                })
-              }
-            }
-            if (element.movie_categories.length > 0) {
-              movieItem.movie_categories = element.movie_categories
-            }
-            if (element.movie_actors.length > 0) {
-              movieItem.movie_actors = element.movie_actors
-            }
-            this.hotMoviesItems.push(movieItem)
-          }
-        }
-      },
-    },
-  },
+  apollo: {},
 }
 </script>

@@ -95,9 +95,8 @@
 <script>
 import moment from 'moment'
 
-// import axios from 'axios'
+import axios from 'axios'
 // import gql from 'graphql-tag'
-// import moment from 'moment'
 export default {
   layout: 'admin',
   name: 'Homepage',
@@ -142,20 +141,7 @@ export default {
           class: 'error font-weight-medium text-h6 white--text',
         },
       ],
-      feedbacks: [
-        {
-          stt: 1,
-          id: null,
-          quality_movie: 'Tốt',
-          user: {
-            id: null,
-            username: 'Huy Hoàng',
-          },
-          is_improve_Eng: 'Có',
-          note: 'Xem phim chất lượng. Có nhiều chức năng mới',
-          created_at_string: moment().format('DD-MM-YYYY HH:mm:ss'),
-        },
-      ],
+      feedbacks: [],
       user: {
         id: null,
         username: null,
@@ -164,7 +150,11 @@ export default {
       },
     }
   },
-  mounted() {},
+  mounted() {
+    const date = moment().format('YYYY-MM-DD')
+    this.dateQueryErrors = [date, date]
+    this.loadDataFeedbacks()
+  },
   watch: {},
   methods: {
     getDisplayRange(date) {
@@ -178,7 +168,37 @@ export default {
       }
       return temp
     },
-    loadDataFeedbacks() {},
+    async loadDataFeedbacks() {
+      let date1 = null
+      let date2 = null
+      if (this.dateQueryFeedbacks[0] > this.dateQueryFeedbacks[1]) {
+        const temp = this.dateQueryFeedbacks
+        this.dateQueryFeedbacks = [temp[1], temp[0]]
+      }
+      date1 = this.dateQueryFeedbacks[0]
+      if (this.dateQueryFeedbacks.length === 1) {
+        this.dateQueryFeedbacks.push(this.dateQueryFeedbacks[0])
+      }
+
+      date2 = this.dateQueryFeedbacks[1]
+      const response = await axios.get(
+        `${process.env.URL_SERVER}/api/get-feedbacks/${date1}/${date2}`
+      )
+      if (response.data && response.data.feedbacks) {
+        const temp = []
+        for (let index = 0; index < response.data.feedbacks.length; index++) {
+          const element = response.data.feedbacks[index]
+          element.stt = index + 1
+          element.created_at_string = moment(element.created_at).format(
+            'DD-MM-YYYY HH:mm:ss'
+          )
+          temp.push(element)
+        }
+        this.feedbacks = temp
+      } else {
+        this.feedbacks = []
+      }
+    },
     searchAll() {},
   },
   apollo: {},

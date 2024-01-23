@@ -234,7 +234,9 @@
                     </v-col>
                     <v-col cols="12" sm="12" lg="12" xl="12" md="12">
                       <v-pagination
-                        v-show="historyMovies.length > 0"
+                        v-show="
+                          historyMovies.length > 0 && lengthPanigation > 1
+                        "
                         v-model="pageMovie"
                         :length="lengthPanigation"
                         :total-visible="7"
@@ -264,6 +266,7 @@ export default {
   },
   data() {
     return {
+      userInfo: null,
       pageMovie: 1,
       lengthPanigation: 0,
       limit: 8,
@@ -281,13 +284,21 @@ export default {
     },
   },
   mounted() {
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
+      this.loadMovieHistory()
+    } else {
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+          this.loadMovieHistory()
+        } else {
+          this.$router.push('/')
+        }
+      })
     }
-    this.loadMovieHistory()
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
   },
 
   methods: {
@@ -321,7 +332,7 @@ export default {
                   movieItem.view = element.view
                   movieItem.title = element.name_en.toUpperCase()
                   movieItem.subtitle = element.name
-                  movieItem.link = '/movies/' + element.code
+                  movieItem.link = '/movies/movie_detail?code=' + element.code
                   movieItem.country = element.country
                   movieItem.year_of_manufacture = element.year_of_manufacture
                   movieItem.time = element.time
@@ -396,7 +407,7 @@ export default {
         })
       }
       if (type === 'actor') {
-        this.$router.push({ path: `/actors/${item.actor.code}` })
+        this.$router.push({ path: `/actors`, query: { code: item.actor.code } })
       }
     },
   },

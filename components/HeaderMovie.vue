@@ -321,18 +321,12 @@
       <v-col cols="12" sm="10" lg="10" xl="10" md="10" color="white">
         <v-row>
           <v-layout style="margin-top: 17px">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <NuxtLink to="/">
-                  <v-btn v-bind="attrs" v-on="on" text small>
-                    <v-icon style="margin-top: -3px">mdi-home</v-icon>
-                    Home</v-btn
-                  >
-                </NuxtLink>
-              </template>
-              <span>Trang chủ</span>
-            </v-tooltip>
-            <v-tooltip bottom>
+            <v-btn to="/" text small>
+              <v-icon style="margin-top: -3px">mdi-home</v-icon>
+              Trang chủ</v-btn
+            >
+
+            <!-- <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <NuxtLink to="/methods">
                   <v-btn v-bind="attrs" v-on="on" text small>
@@ -343,19 +337,13 @@
               </template>
 
               <span>Hướng dẫn</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <NuxtLink to="/search">
-                  <v-btn v-bind="attrs" v-on="on" text small>
-                    <v-icon style="margin-top: -3px">mdi-magnify</v-icon>
-                    Search</v-btn
-                  >
-                </NuxtLink>
-              </template>
+            </v-tooltip> -->
 
-              <span>Tìm kiếm phim</span>
-            </v-tooltip>
+            <v-btn to="/search" text small>
+              <v-icon style="margin-top: -3px">mdi-magnify</v-icon>
+              Tìm kiếm phim</v-btn
+            >
+
             <v-spacer></v-spacer>
             <v-img
               style="margin-top: -20px"
@@ -364,27 +352,22 @@
               :src="require('~/static/logo.png')"
             ></v-img>
             <v-spacer></v-spacer>
-            <v-spacer></v-spacer>
 
-            <v-tooltip v-if="!isLogin" bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  @click="openDialogSignIn"
-                  text
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon style="margin-top: -3px">mdi-account</v-icon>
-                  Sign in/Sign up
-                </v-btn>
-              </template>
-              <span>Đăng nhập / Đăng ký</span>
-            </v-tooltip>
+            <v-btn v-if="isLogin" to="/user/buy_point" text small>
+              <v-icon style="margin-top: -3px">mdi-chess-queen</v-icon>
+              Kích hoạt VIP
+            </v-btn>
+
+            <v-btn v-if="!isLogin" @click="openDialogSignIn" text small>
+              <v-icon style="margin-top: -3px">mdi-account</v-icon>
+              Đăng nhập / Đăng ký
+            </v-btn>
+
             <v-menu v-else bottom offset-y :close-on-content-click="false">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn small color="white" text v-bind="attrs" v-on="on">
-                  Hi, {{ user.username }} <v-icon small>mdi-menu-down</v-icon>
+                  Xin chào, {{ user.username }}
+                  <v-icon small>mdi-menu-down</v-icon>
                 </v-btn>
               </template>
 
@@ -470,7 +453,8 @@
 <script>
 // Nơi để import package
 import axios from 'axios'
-import cookie from 'cookiejs'
+// import cookie from 'cookiejs'
+import moment from 'moment'
 export default {
   layout: '', // layout chính của file
   props: {}, // Nhận data được truyền vào
@@ -537,42 +521,83 @@ export default {
 
   async mounted() {
     try {
-      const requestGetUser = await fetch(
+      // const requestGetUser = await fetch(
+      //   `${process.env.URL_SERVER}/account/get-user`,
+      //   {
+      //     method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      //     mode: 'cors', // no-cors, *cors, same-origin
+      //     headers: {
+      //       'Access-Control-Allow-Origin': '*',
+      //       'Access-Control-Allow-Credentials': "true",
+      //       'Content-Type': 'application/json',
+      //     },
+      //     credentials: 'include',
+      //   }
+      // )
+
+      // const response = await requestGetUser.json()
+      const response = await axios.get(
         `${process.env.URL_SERVER}/account/get-user`,
         {
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-          mode: 'cors', // no-cors, *cors, same-origin
           headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
+            // 'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': 'true',
             'Content-Type': 'application/json',
           },
-          credentials: 'include',
+          withCredentials: true,
         }
       )
-      const response = await requestGetUser.json()
-
-      if (response.status) {
-        const dataUser = response.data
-        this.user = {
-          image_user: dataUser.image_user ? dataUser.image_user : null,
+      if (response.data.status) {
+        const dataUser = response.data.data
+        const temp = {
           id: dataUser.id,
           tempUsername: dataUser.username,
           username: dataUser.username,
           email: dataUser.email,
+          point: dataUser.point,
+          durationOriginal: dataUser.duration,
+          duration: dataUser.duration
+            ? moment(dataUser.duration)
+                .add('hours', 7)
+                .format('DD-MM-YYYY HH:mm:ss')
+            : '',
+          is_active_vip: dataUser.is_active_vip,
+          point_active: dataUser.point_active,
+          image_user: dataUser.image_user
+            ? dataUser.image_user
+            : require('~/static/icon.png'),
+        }
+        this.user = {
+          id: dataUser.id,
+          tempUsername: dataUser.username,
+          username: dataUser.username,
+          email: dataUser.email,
+          point: dataUser.point,
+          durationOriginal: dataUser.duration,
+          duration: dataUser.duration
+            ? moment(dataUser.duration)
+                .add('hours', 7)
+                .format('DD-MM-YYYY HH:mm:ss')
+            : '',
+          is_active_vip: dataUser.is_active_vip,
+          point_active: dataUser.point_active,
+          image_user: dataUser.image_user
+            ? dataUser.image_user
+            : require('~/static/icon.png'),
           password: '',
           verify: '',
           oldPassword: '',
         }
         this.isLogin = true
-        localStorage.setItem('user_id', this.user.id)
-        // this.$nuxt.$emit('auth', this.user.id)
+        this.$store.commit('setDataUser', temp)
+        this.$nuxt.$emit('auth', temp)
       } else {
-        localStorage.removeItem('user_id')
-        // this.$nuxt.$emit('auth', this.user.id)
+        this.$store.commit('setDataUser', null)
+        this.$nuxt.$emit('auth', null)
       }
     } catch (error) {
-      localStorage.removeItem('user_id')
+      this.$store.commit('setDataUser', null)
+      this.$nuxt.$emit('auth', null)
     }
   },
 
@@ -599,22 +624,31 @@ export default {
         password: this.signInItem.password,
       }
       await axios
-        .post(`${process.env.URL_SERVER}/account/login-user`, {
+        .post(
+          `${process.env.URL_SERVER}/account/login-user`,
           // eslint-disable-next-line camelcase
-          data_login,
-        })
+          { data_login },
+          {
+            // eslint-disable-next-line camelcase
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+          }
+        )
         .then((response) => {
           if (response && response.data) {
             if (response.data.status) {
-              cookie.set('jwt-login', response.data.data.token, 1)
+              // cookie.set('jwt-login', response.data.data.token, 1)
               this.dialogSignIn = false
               this.$toast.success('Đăng nhập thành công', {
                 duration: 2000,
                 position: 'top-center',
               })
+              localStorage.setItem('user_id', response.data.data.id)
               setTimeout(() => {
                 location.reload()
-              }, 3000)
+              }, 2000)
             } else {
               this.$toast.error(`${response.data.message}`, {
                 duration: 2000,
@@ -703,7 +737,7 @@ export default {
         })
         .catch((error) => {
           console.log(error)
-          this.$toast.error('Có lỗi xảy trong quá trình đăng nhập', {
+          this.$toast.error('Có lỗi xảy trong quá trình đăng ký', {
             duration: 2000,
             position: 'top-center',
           })
@@ -715,10 +749,19 @@ export default {
       this.$refs.formLogin.resetValidation()
       this.$refs.formRegister.resetValidation()
     },
-    signOut() {
-      cookie.remove('jwt-login')
-      localStorage.removeItem('user_id')
-      location.reload()
+    async signOut() {
+      await axios.post(
+        `${process.env.URL_SERVER}/account/logout-user`,
+        {},
+        {
+          withCredentials: true,
+        }
+      )
+
+      // cookie.remove('jwt-login')
+      this.$store.commit('setDataUser', null)
+      this.$nuxt.$emit('auth', null)
+      window.location.reload()
     },
     openDialogChangeInfo() {
       this.isChangePassword = false

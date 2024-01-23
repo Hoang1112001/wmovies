@@ -3,6 +3,15 @@
 <!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <template>
   <v-app>
+    <v-snackbar v-model="snackbar">
+      {{ textSnackbar }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">
+          ĐÓNG
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-card elevation="24" width="95%" style="margin: 10px auto" class="white">
       <v-row>
         <v-col cols="12" sm="9" lg="9" xl="9" md="9">
@@ -86,7 +95,9 @@
                               {{ 'Được lưu từ phim: ' }}
                               <nuxt-link
                                 class="linkMovie"
-                                :to="'/movies/' + item.movie.code"
+                                :to="
+                                  '/movies/movie_detail?code=' + item.movie.code
+                                "
                               >
                                 {{
                                   item.movie.name_en.toUpperCase()
@@ -106,7 +117,7 @@
                               >
                                 Nghe
                               </v-btn>
-                              <v-btn
+                              <!-- <v-btn
                                 color="black"
                                 class="ml-2 mt-n3"
                                 height="40px"
@@ -116,7 +127,7 @@
                                 width="40px"
                               >
                                 Nói
-                              </v-btn>
+                              </v-btn> -->
                               <v-btn
                                 color="black"
                                 class="ml-2 mt-n3"
@@ -125,6 +136,7 @@
                                 rounded
                                 outlined
                                 width="40px"
+                                @click="deleteCouplet(item)"
                               >
                                 Xóa
                               </v-btn>
@@ -135,7 +147,7 @@
                     </v-col>
                     <v-col cols="12" sm="12" lg="12" xl="12" md="12">
                       <v-pagination
-                        v-show="couplets.length > 0"
+                        v-show="couplets.length > 0 && lengthPanigation > 1"
                         v-model="pageCouplet"
                         :length="lengthPanigation"
                         :total-visible="7"
@@ -149,46 +161,7 @@
           </v-card-text>
         </v-col>
         <v-col cols="12" sm="3" lg="3" xl="3" md="3">
-          <v-card max-width="450" class="mx-auto mt-2 mr-2">
-            <v-toolbar color="error" dark>
-              <v-row class="d-flex justify-space-between ml-2 mt-2">
-                <v-toolbar-title class="font-weight-bold"
-                  >PHIM ĐỀ XUẤT
-                </v-toolbar-title>
-                <v-img
-                  class="mt-n4"
-                  max-height="68"
-                  max-width="85"
-                  :src="require('~/static/logo.png')"
-                ></v-img>
-              </v-row>
-            </v-toolbar>
-
-            <v-list three-line>
-              <template v-for="(item, index) in listViewMovies">
-                <v-divider
-                  v-if="item.divider"
-                  :key="index"
-                  :inset="item.inset"
-                ></v-divider>
-
-                <v-list-item v-else :key="item.title" :href="item.link">
-                  <v-list-item-avatar tile>
-                    <v-img :src="item.image"></v-img>
-                  </v-list-item-avatar>
-
-                  <v-list-item-content>
-                    <v-list-item-title class="orange--text font-weight-bold">{{
-                      item.title
-                    }}</v-list-item-title>
-                    <v-list-item-subtitle class="font-italic">{{
-                      item.subtitle
-                    }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </v-list>
-          </v-card>
+          <Recommend />
         </v-col>
       </v-row>
     </v-card>
@@ -197,61 +170,27 @@
 </template>
 
 <script>
+import gql from 'graphql-tag'
 import axios from 'axios'
+import Recommend from '~/components/Recommend.vue'
 
 export default {
-  asyncData({ params }) {
+  asyncData({ params, route }) {
     // Lấy dữ liệu chi tiết về phim từ API hoặc nguồn dữ liệu khác bằng slug name
-    const slug = params.slug
-    console.log(slug)
+    const slug = decodeURIComponent(route.query.code)
 
     const movieE = slug // Hàm fetch phim theo slug name
 
     return { movieE }
   },
+  components: {
+    Recommend,
+  },
   data() {
     return {
-      listViewMovies: [
-        {
-          action: '',
-          image: require('~/static/friend-1.jpg'),
-          subtitle: 'Những người bạn mùa 1',
-          title: 'FRIENDS SEASON 1',
-          link: '/movies/friend-season-1',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-2.jpg'),
-          subtitle: 'Những người bạn mùa 2',
-          title: 'FRIENDS SEASON 2',
-          link: '/movies/friend-season-2',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-3.jpg'),
-          subtitle: 'Những người bạn mùa 3',
-          title: 'FRIENDS SEASON 3',
-          link: '/movies/friend-season-3',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-4.jpg'),
-          subtitle: 'Những người bạn mùa 4',
-          title: 'FRIENDS SEASON 4',
-          link: '/movies/friend-season-4',
-        },
-        { divider: true, inset: true },
-        {
-          action: '',
-          image: require('~/static/friend-5.jpg'),
-          subtitle: 'Những người bạn mùa 5',
-          title: 'FRIENDS SEASON 5',
-          link: '/movies/friend-season-5',
-        },
-      ],
+      snackbar: false,
+      textSnackbar: '',
+      userInfo: null,
       pageCouplet: 1,
       lengthPanigation: 0,
       limit: 4,
@@ -271,13 +210,18 @@ export default {
     }
   },
   mounted() {
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
     } else {
-      this.$router.push('/')
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+        } else {
+          this.$router.push('/')
+        }
+      })
     }
     this.loadMovieCouplets()
   },
@@ -290,9 +234,25 @@ export default {
   },
   methods: {
     toLink(type) {
-      this.$router.push(
-        `/movies${type === '' ? '' : '/' + type}/${this.movieE}`
-      )
+      if (type === '') {
+        this.$router.push({
+          path: `/movies/movie_detail`,
+          query: { code: this.movie.code },
+        })
+      }
+      if (type === 'word') {
+        this.$router.push({
+          path: `/movies/word`,
+          query: { code: this.movie.code },
+        })
+      }
+
+      if (type === 'couplet') {
+        this.$router.push({
+          path: `/movies/couplet`,
+          query: { code: this.movie.code },
+        })
+      }
     },
     async loadMovieCouplets() {
       if (this.isLogin) {
@@ -401,6 +361,32 @@ export default {
         console.error('Trình duyệt không hỗ trợ API Web Speech.')
       }
     },
+    deleteCouplet(item) {
+      const updateGraphl = gql` mutation MyMutation {
+            delete_movie_couplets(
+              where: { id: { _eq: "${item.id}" } }
+            ) {
+              affected_rows
+            }
+          }`
+      this.$apollo.mutate({
+        mutation: updateGraphl,
+        variables: {},
+        // eslint-disable-next-line camelcase
+        update: (store, { data: { delete_movie_couplets } }) => {
+          // eslint-disable-next-line camelcase
+          if (delete_movie_couplets.affected_rows) {
+            this.textSnackbar = 'Xóa cặp câu thành công'
+            this.snackbar = true
+            this.loadMovieCouplets()
+          } else {
+            this.loadMovieCouplets()
+            this.textSnackbar = 'Xóa cặp câu thất bại'
+            this.snackbar = true
+          }
+        },
+      })
+    },
   },
 }
 </script>
@@ -410,7 +396,7 @@ export default {
   color: black;
 }
 .linkMovie:hover {
-  color: orange;
+  color: red;
   text-decoration: underline;
 }
 </style>

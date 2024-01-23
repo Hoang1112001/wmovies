@@ -70,6 +70,7 @@ import axios from 'axios'
 export default {
   layout: 'default',
   data: () => ({
+    userInfo: null,
     statusSendMail: false,
     loading: false,
     snackbar: false,

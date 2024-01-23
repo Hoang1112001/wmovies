@@ -203,14 +203,16 @@
               </div>
             </v-card-text>
             <v-card-actions>
-              <v-btn text color="orange" :to="item.link"> Xem ngay </v-btn>
+              <v-btn text color="orange" @click="toLink(item)">
+                Xem ngay
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-carousel-item>
       </v-carousel>
     </v-card>
     <!-- Introduce -->
-    <v-card
+    <!-- <v-card
       elevation="24"
       width="95%"
       style="margin: 40px auto"
@@ -250,7 +252,7 @@
           >
         </v-col>
       </v-row>
-    </v-card>
+    </v-card> -->
     <!-- Main -->
     <v-card
       elevation="24"
@@ -294,7 +296,7 @@
                       >
                       </v-img>
                       <div class="overlay">
-                        <v-btn fab large :to="file.link">
+                        <v-btn fab large @click="toLink(file)">
                           <v-icon>mdi-play</v-icon></v-btn
                         >
                       </div>
@@ -417,7 +419,7 @@
                       </v-chip>
                     </v-col>
                     <v-col class="d-flex">
-                      <nuxt-link :to="file.link">
+                      <a @click="toLink(file)">
                         <span
                           class="d-inline-block text-truncate hover-title red--text"
                           style="font-size: 16px; max-width: 180px"
@@ -425,7 +427,7 @@
                           {{
                             file.title + ' (' + file.year_of_manufacture + ')'
                           }}
-                        </span></nuxt-link
+                        </span></a
                       >
                     </v-col>
                   </v-row>
@@ -526,7 +528,7 @@
                       >
                       </v-img>
                       <div class="overlay">
-                        <v-btn fab large :to="file.link">
+                        <v-btn fab large @click="toLink(file)">
                           <v-icon>mdi-play</v-icon></v-btn
                         >
                       </div>
@@ -649,7 +651,7 @@
                       </v-chip>
                     </v-col>
                     <v-col class="d-flex">
-                      <nuxt-link :to="file.link">
+                      <a @click="toLink(file)">
                         <span
                           class="d-inline-block text-truncate hover-title red--text"
                           style="font-size: 16px; max-width: 180px"
@@ -657,7 +659,7 @@
                           {{
                             file.title + ' (' + file.year_of_manufacture + ')'
                           }}
-                        </span></nuxt-link
+                        </span></a
                       >
                     </v-col>
                   </v-row>
@@ -757,7 +759,7 @@
                           >
                           </v-img>
                           <div class="overlay">
-                            <v-btn fab large :to="file.link">
+                            <v-btn fab large @click="toLink(file)">
                               <v-icon>mdi-play</v-icon></v-btn
                             >
                           </div>
@@ -886,7 +888,7 @@
                           </v-chip>
                         </v-col>
                         <v-col class="d-flex">
-                          <nuxt-link :to="file.link">
+                          <a @click="toLink(file)">
                             <span
                               class="d-inline-block text-truncate hover-title red--text"
                               style="font-size: 16px; max-width: 180px"
@@ -897,7 +899,7 @@
                                 file.year_of_manufacture +
                                 ')'
                               }}
-                            </span></nuxt-link
+                            </span></a
                           >
                         </v-col>
                       </v-row>
@@ -1010,7 +1012,7 @@
                   <v-tab-item>
                     <v-list three-line>
                       <template v-for="item in listViewMovies">
-                        <v-list-item :href="item.link">
+                        <v-list-item @click="toLink(item)">
                           <a class="d-flex">
                             <v-list-item-avatar tile>
                               <v-img :src="item.image"></v-img>
@@ -1034,7 +1036,7 @@
                   <v-tab-item>
                     <v-list three-line>
                       <template v-for="item in listViewMoviesWeek">
-                        <v-list-item :href="item.link">
+                        <v-list-item @click="toLink(item)">
                           <a class="d-flex">
                             <v-list-item-avatar tile>
                               <v-img :src="item.image"></v-img>
@@ -1058,7 +1060,7 @@
                   <v-tab-item>
                     <v-list three-line>
                       <template v-for="item in listViewMoviesMonth">
-                        <v-list-item :href="item.link">
+                        <v-list-item @click="toLink(item)">
                           <a class="d-flex">
                             <v-list-item-avatar tile>
                               <v-img :src="item.image"></v-img>
@@ -1153,7 +1155,7 @@
                   <v-tab-item>
                     <v-list three-line>
                       <template v-for="item in listViewMoviesSeries">
-                        <v-list-item :href="item.link">
+                        <v-list-item @click="toLink(item)">
                           <a class="d-flex">
                             <v-list-item-avatar tile>
                               <v-img :src="item.image"></v-img>
@@ -1177,7 +1179,7 @@
                   <v-tab-item>
                     <v-list three-line>
                       <template v-for="item in listViewMoviesSeriesWeek">
-                        <v-list-item :href="item.link">
+                        <v-list-item @click="toLink(item)">
                           <a class="d-flex">
                             <v-list-item-avatar tile>
                               <v-img :src="item.image"></v-img>
@@ -1201,7 +1203,7 @@
                   <v-tab-item>
                     <v-list three-line>
                       <template v-for="item in listViewMoviesSeriesMonth">
-                        <v-list-item :href="item.link">
+                        <v-list-item @click="toLink(item)">
                           <a class="d-flex">
                             <v-list-item-avatar tile>
                               <v-img :src="item.image"></v-img>
@@ -1269,6 +1271,7 @@ export default {
   name: 'IndexPage',
   data() {
     return {
+      userInfo: null,
       isLogin: false,
       loadingText: 'Đang cập nhật dữ liệu, bạn chờ tí nhé ...',
       snackbar: false,
@@ -1336,11 +1339,16 @@ export default {
     }
   },
   mounted() {
-    // this.$nuxt.$on('auth', (auth) => {
-    //   this.isLogin = auth
-    // })
-    if (localStorage.getItem('user_id')) {
-      this.isLogin = localStorage.getItem('user_id')
+    if (this.$nuxt.$store.state.data) {
+      this.isLogin = this.$nuxt.$store.state.data.id
+      this.userInfo = this.$nuxt.$store.state.data
+    } else {
+      this.$nuxt.$on('auth', (auth) => {
+        if (auth && auth.id) {
+          this.isLogin = auth.id
+          this.userInfo = { ...auth }
+        }
+      })
     }
     this.loadDataMovieLatest()
     this.loadDataMovieRecommend()
@@ -1387,6 +1395,7 @@ export default {
               movieItem.view = element.view
               movieItem.title = element.name_en.toUpperCase()
               movieItem.subtitle = element.name
+              movieItem.code = element.code
               movieItem.link = '/movies/' + element.code
               movieItem.country = element.country
               movieItem.year_of_manufacture = element.year_of_manufacture
@@ -1434,6 +1443,7 @@ export default {
               movieItem.view = element.view
               movieItem.title = element.name_en.toUpperCase()
               movieItem.subtitle = element.name
+              movieItem.code = element.code
               movieItem.link = '/movies/' + element.code
               movieItem.country = element.country
               movieItem.year_of_manufacture = element.year_of_manufacture
@@ -1481,6 +1491,7 @@ export default {
               movieItem.view = element.view
               movieItem.title = element.name_en.toUpperCase()
               movieItem.subtitle = element.name
+              movieItem.code = element.code
               movieItem.link = '/movies/' + element.code
               movieItem.country = element.country
               movieItem.year_of_manufacture = element.year_of_manufacture
@@ -1550,6 +1561,7 @@ export default {
               movieItem.view = element.view
               movieItem.title = element.name_en.toUpperCase()
               movieItem.subtitle = element.name
+              movieItem.code = element.code
               movieItem.link = '/movies/' + element.code
               movieItem.country = element.country
               movieItem.year_of_manufacture = element.year_of_manufacture
@@ -1620,6 +1632,7 @@ export default {
               movieItem.view = element.view
               movieItem.title = element.name_en.toUpperCase()
               movieItem.subtitle = element.name
+              movieItem.code = element.code
               movieItem.link = '/movies/' + element.code
               movieItem.country = element.country
               movieItem.year_of_manufacture = element.year_of_manufacture
@@ -1745,6 +1758,7 @@ export default {
               movieItem.view = element.view
               movieItem.title = element.name_en.toUpperCase()
               movieItem.subtitle = element.name
+              movieItem.code = element.code
               movieItem.link = '/movies/' + element.code
               movieItem.country = element.country
               movieItem.year_of_manufacture = element.year_of_manufacture
@@ -1877,8 +1891,11 @@ export default {
         },
       })
     },
-    toLink(link) {
-      this.$router.push(link)
+    toLink(item) {
+      this.$router.push({
+        path: '/movies/movie_detail',
+        query: { code: item.code },
+      })
     },
     toLinkSearch(type, item) {
       if (type === 'status') {
@@ -1894,7 +1911,7 @@ export default {
         })
       }
       if (type === 'actor') {
-        this.$router.push({ path: `/actors/${item.actor.code}` })
+        this.$router.push({ path: `/actors`, query: { code: item.actor.code } })
       }
     },
   },
